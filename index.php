@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.1 2005/06/19 05:04:25 bitweaver Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2 2005/06/20 14:30:44 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -12,7 +12,7 @@ require_once( '../bit_setup_inc.php' );
 require_once( SEARCH_PKG_PATH.'/search_lib.php');
 // note: lib/search/searchlib.php is new. the old one was lib/searchlib.php
 
-$searchlib = &new SearchLib($gBitSystem->db);
+$searchlib = &new SearchLib();
 
 $gBitSystem->verifyPackage( 'search' );
 
