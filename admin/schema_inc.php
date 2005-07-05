@@ -32,7 +32,7 @@ $tables = array(
 global $gBitInstaller;
 
 foreach( array_keys( $tables ) AS $tableName ) {
-	$gBitInstaller->registerSchemaTable( SEARCH_PKG_DIR, $tableName, $tables[$tableName] );
+	$gBitInstaller->registerSchemaTable( SEARCH_PKG_NAME, $tableName, $tables[$tableName] );
 }
 
 $indices = array (
@@ -43,7 +43,7 @@ $indices = array (
 	'tiki_searchsyl_last_used_idx' => array( 'table' => 'tiki_searchsyllable', 'cols' => 'last_used', 'opts' => NULL )
 );
 
-$gBitInstaller->registerSchemaIndexes( SEARCH_PKG_DIR, $indices );
+$gBitInstaller->registerSchemaIndexes( SEARCH_PKG_NAME, $indices );
 
 $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 	'description' => "This package makes any content on your site searchable.",
