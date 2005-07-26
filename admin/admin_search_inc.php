@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1 2005/06/19 05:04:25 bitweaver Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.1 2005/07/26 15:50:27 drewslater Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -58,8 +58,8 @@ if (isset($_REQUEST["searchprefs"])) {
 		$formSearchInts[$item]['value'] = $gBitSystem->mPrefs[$item];
 	}
 }
-$smarty->assign( 'formSearchToggles',$formSearchToggles );
-$smarty->assign( 'formSearchInts',$formSearchInts );
+$gBitSmarty->assign( 'formSearchToggles',$formSearchToggles );
+$gBitSmarty->assign( 'formSearchInts',$formSearchInts );
 
 
 ?>

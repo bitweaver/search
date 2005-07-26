@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.1.1.1.2.1 2005/06/27 15:56:42 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.1.1.1.2.2 2005/07/26 15:50:26 drewslater Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: directory_search.php,v 1.1.1.1.2.1 2005/06/27 15:56:42 lsces Exp $
+ * $Id: directory_search.php,v 1.1.1.1.2.2 2005/07/26 15:50:26 drewslater Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -22,29 +22,29 @@ require_once( '../bit_setup_inc.php' );
 include_once( DIRECTORY_PKG_PATH.'dir_lib.php' );
 
 if ($feature_directory != 'y') {
-	$smarty->assign('msg', tra("This feature is disabled").": feature_directory");
+	$gBitSmarty->assign('msg', tra("This feature is disabled").": feature_directory");
 
 	$gBitSystem->display( 'error.tpl' );
 	die;
 }
 
 if (!$gBitUser->hasPermission( 'bit_p_view_directory' )) {
-	$smarty->assign('msg', tra("Permission denied"));
+	$gBitSmarty->assign('msg', tra("Permission denied"));
 
 	$gBitSystem->display( 'error.tpl' );
 	die;
 }
 
-$smarty->assign('words', $_REQUEST['words']);
-$smarty->assign('where', $_REQUEST['where']);
-$smarty->assign('how', $_REQUEST['how']);
+$gBitSmarty->assign('words', $_REQUEST['words']);
+$gBitSmarty->assign('where', $_REQUEST['where']);
+$gBitSmarty->assign('how', $_REQUEST['how']);
 
 if ( empty( $_REQUEST["sort_mode"] ) ) {
 	$sort_mode = 'hits_desc';
 } else {
 	$sort_mode = $_REQUEST["sort_mode"];
 }
-$smarty->assign_by_ref('sort_mode', $sort_mode);
+$gBitSmarty->assign_by_ref('sort_mode', $sort_mode);
 
 if (!isset($_REQUEST["offset"])) {
 	$offset = 0;
@@ -55,14 +55,14 @@ if (isset($_REQUEST['page'])) {
 	$page = &$_REQUEST['page'];
 	$offset = ($page - 1) * $maxRecords;
 }
-$smarty->assign_by_ref('offset', $offset);
+$gBitSmarty->assign_by_ref('offset', $offset);
 
 if (isset($_REQUEST["find"])) {
 	$find = $_REQUEST["find"];
 } else {
 	$find = '';
 }
-$smarty->assign('find', $find);
+$gBitSmarty->assign('find', $find);
 
 if ($_REQUEST['where'] == 'all') {
 	$items = $dirlib->dir_search($_REQUEST['words'], $_REQUEST['how'], $offset, $maxRecords, $sort_mode);
@@ -71,22 +71,22 @@ if ($_REQUEST['where'] == 'all') {
 }
 
 $cant_pages = ceil($items["cant"] / $maxRecords);
-$smarty->assign_by_ref('cant_pages', $cant_pages);
-$smarty->assign('actual_page', 1 + ($offset / $maxRecords));
+$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
+$gBitSmarty->assign('actual_page', 1 + ($offset / $maxRecords));
 
 if ($items["cant"] > ($offset + $maxRecords)) {
-	$smarty->assign('next_offset', $offset + $maxRecords);
+	$gBitSmarty->assign('next_offset', $offset + $maxRecords);
 } else {
-	$smarty->assign('next_offset', -1);
+	$gBitSmarty->assign('next_offset', -1);
 }
 
 if ($offset > 0) {
-	$smarty->assign('prev_offset', $offset - $maxRecords);
+	$gBitSmarty->assign('prev_offset', $offset - $maxRecords);
 } else {
-	$smarty->assign('prev_offset', -1);
+	$gBitSmarty->assign('prev_offset', -1);
 }
 
-$smarty->assign_by_ref('items', $items["data"]);
+$gBitSmarty->assign_by_ref('items', $items["data"]);
 
 $section = 'directory';
 

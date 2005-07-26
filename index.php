@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2 2005/06/20 14:30:44 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.1 2005/07/26 15:50:26 drewslater Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -34,8 +34,8 @@ if (!isset($_REQUEST["where"])) {
 	$where = $_REQUEST["where"];
 }
 
-$smarty->assign('where',$where);
-$smarty->assign('where2',tra($where));
+$gBitSmarty->assign('where',$where);
+$gBitSmarty->assign('where2',tra($where));
 
 if($where=='wikis') {
 	$gBitSystem->verifyPackage( 'wiki' );
@@ -82,7 +82,7 @@ if(($where=='trackers')) {
 	$gBitSystem->verifyPermission( 'bit_p_view_trackers' );
 }
 
-// Already assigned above! $smarty->assign('where',$where);
+// Already assigned above! $gBitSmarty->assign('where',$where);
 if (!isset($_REQUEST["offset"])) {
 	$offset = 0;
 } else {
@@ -92,7 +92,7 @@ if (isset($_REQUEST['page'])) {
 	$page = &$_REQUEST['page'];
 	$offset = ($page - 1) * $maxRecords;
 }
-$smarty->assign_by_ref('offset', $offset);
+$gBitSmarty->assign_by_ref('offset', $offset);
 
 $fulltext = $feature_search_fulltext == 'y';
 
@@ -100,12 +100,12 @@ $fulltext = $feature_search_fulltext == 'y';
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
 	$results = $searchlib->find($where,' ', $offset, $maxRecords, $fulltext);
 
-	$smarty->assign('words', '');
+	$gBitSmarty->assign('words', '');
 } else {
 	$words = strip_tags($_REQUEST["words"]);
 	$results = $searchlib->find($where,$words, $offset, $maxRecords, $fulltext);
 
-	$smarty->assign('words', $words);
+	$gBitSmarty->assign('words', $words);
 }
 
 //if ($fulltext == 'y') {
@@ -130,25 +130,25 @@ if ( $results['cant'] > 0 ) {
 }
 
 $cant_pages = ceil($results["cant"] / $maxRecords);
-$smarty->assign('cant_results', $results["cant"]);
-$smarty->assign_by_ref('cant_pages', $cant_pages);
-$smarty->assign('actual_page', 1 + ($offset / $maxRecords));
+$gBitSmarty->assign('cant_results', $results["cant"]);
+$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
+$gBitSmarty->assign('actual_page', 1 + ($offset / $maxRecords));
 
 if ($results["cant"] > ($offset + $maxRecords)) {
-	$smarty->assign('next_offset', $offset + $maxRecords);
+	$gBitSmarty->assign('next_offset', $offset + $maxRecords);
 } else {
-	$smarty->assign('next_offset', -1);
+	$gBitSmarty->assign('next_offset', -1);
 }
 
 // If offset is > 0 then prev_offset
 if ($offset > 0) {
-	$smarty->assign('prev_offset', $offset - $maxRecords);
+	$gBitSmarty->assign('prev_offset', $offset - $maxRecords);
 } else {
-	$smarty->assign('prev_offset', -1);
+	$gBitSmarty->assign('prev_offset', -1);
 }
 
 // Find search results (build array)
-$smarty->assign_by_ref('results', $results["data"]);
+$gBitSmarty->assign_by_ref('results', $results["data"]);
 
 // Display the template
 $gBitSystem->display( 'bitpackage:search/search.tpl');
