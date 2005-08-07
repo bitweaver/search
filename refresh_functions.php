@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.2 2005/06/28 07:45:57 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.2 2005/06/28 07:45:57 spiderr Exp $
+ * $Id: refresh_functions.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -21,11 +21,11 @@ function random_refresh_index_comments() {
   //find random forum comment
   global $gBitSystem;
   // get random comment
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_comments`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_comments`",array());
   if($cant>0) {
 	require_once( LIBERTY_PKG_PATH.'LibertyComment.php' );
     $query="select tcm.*,tc.`title`,tc.`data` from `".BIT_DB_PREFIX."tiki_comments` tcm INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON(tcm.`content_id`=tc.`content_id` )";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["title"]." ".$res["data"]);
     insert_index($words, BITCOMMENT_CONTENT_TYPE_GUID, $res["comment_id"]);
@@ -39,10 +39,10 @@ function random_refresh_index_wiki(){
 		require_once( WIKI_PKG_PATH.'BitPage.php' );
 		//find random wiki page
 		global $wikilib;
-		$cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_pages`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_pages`",array());
 		if($cant>0) {
 			$query="select `content_id` from `".BIT_DB_PREFIX."tiki_pages`";
-    		$result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    		$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     		$res=$result->fetchRow();
 			refresh_index_wiki( $res["content_id"] );
 		}
@@ -70,10 +70,10 @@ function random_refresh_index_blogs() {
 	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
 		// get random blog
-		$cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blogs`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blogs`",array());
 		if($cant>0) {
 			$query="select tb.*, uu.`login` as `user`, uu.`real_name` from `".BIT_DB_PREFIX."tiki_blogs` tb, `".BIT_DB_PREFIX."users_users` uu WHERE uu.`user_id` = tb.`user_id`";
-			$result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=&search_index($res["title"]." ".$res["user"]." ".$res["description"]);
 			insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $res["blog_id"]);
@@ -87,12 +87,12 @@ function random_refresh_index_blog_posts() {
 	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlogPost.php' );
 		// get random blog
-		$cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blog_posts`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blog_posts`",array());
 		if($cant>0) {
 			$query="SELECT tbp.*, tc.*, uu.`login` as `user`, uu.`real_name`
 					FROM `".BIT_DB_PREFIX."tiki_blog_posts` tbp, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
 					WHERE tbp.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
-			$result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=&search_index($res["title"]." ".$res["user"]." ".$res["data"]);
 			insert_index($words, BITBLOGPOST_CONTENT_TYPE_GUID, $res["content_id"]);
@@ -106,10 +106,10 @@ function random_refresh_index_articles() {
 	if( $gBitSystem->isPackageActive( 'articles' ) ) {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' );
 		// get random article
-		$cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_articles`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_articles`",array());
 		if($cant>0 && !empty($res)) {
 			$query="select * from `".BIT_DB_PREFIX."tiki_articles`";
-			$result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=&search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["body"]." ".$res["author"]);
 			insert_index($words,'article',$res["article_id"]);
@@ -121,10 +121,10 @@ function random_refresh_index_articles() {
 function random_refresh_index_dir_cats() {
   global $gBitSystem;
   // get random directory ctegory
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_directory_categories`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_directory_categories`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_directory_categories`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]);
     insert_index($words,'dir_cat',$res["category_id"]);
@@ -134,10 +134,10 @@ function random_refresh_index_dir_cats() {
 function random_refresh_index_dir_sites() {
   global $gBitSystem;
   // get random directory ctegory
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_directory_sites`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_directory_sites`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_directory_sites`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]);
     insert_index($words,'dir_site',$res["site_id"]);
@@ -147,10 +147,10 @@ function random_refresh_index_dir_sites() {
 function random_refresh_index_faqs() {
   global $gBitSystem;
   // get random faq
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_faqs`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_faqs`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_faqs`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["title"]." ".$res["description"]);
     insert_index($words,'faq',$res["faq_id"]);
@@ -160,10 +160,10 @@ function random_refresh_index_faqs() {
 function random_refresh_index_faq_questions() {
   global $gBitSystem;
   // get random faq
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_faq_questions`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_faq_questions`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_faq_questions`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["question"]." ".$res["answer"]);
     insert_index($words,'faq_question',$res["question_id"]);
@@ -173,10 +173,10 @@ function random_refresh_index_faq_questions() {
 function random_refresh_index_forum() {
   global $gBitSystem;
   // get random forum
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_forums`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_forums`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_forums`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]." ".$res["moderator"]);
     insert_index($words,'forum',$res["forum_id"]);
@@ -186,10 +186,10 @@ function random_refresh_index_forum() {
 function random_refresh_imggals() {
   global $feature_galleries;
   global $gBitSystem;
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_galleries`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_galleries`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_galleries`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]);
     insert_index($words,"imggal",$res["gallery_id"]);
@@ -199,10 +199,10 @@ function random_refresh_imggals() {
 function random_refresh_img() {
   global $feature_galleries;
   global $gBitSystem;
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_images`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_images`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_images`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]);
     insert_index($words,"img",$res["image_id"]);
@@ -211,10 +211,10 @@ function random_refresh_img() {
 
 function random_refresh_index_trackers() {
   global $gBitSystem;
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_trackers`",array());
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_trackers`",array());
   if($cant>0) {
     $query="select * from `".BIT_DB_PREFIX."tiki_trackers`";
-    $result=$gBitSystem->query($query,array(),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["name"]." ".$res["description"]);
     insert_index($words,'tracker',$res["tracker_id"]);
@@ -223,13 +223,13 @@ function random_refresh_index_trackers() {
 
 function random_refresh_index_tracker_items() {
   global $gBitSystem;
-  $cant=$gBitSystem->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_tracker_item_fields` f, `".BIT_DB_PREFIX."tiki_tracker_fields` tf
+  $cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_tracker_item_fields` f, `".BIT_DB_PREFIX."tiki_tracker_fields` tf
 	where tf.`type` in (?,?) and tf.`field_id`=f.`field_id`",array("t","a"));
   if($cant>0) {
     $query="select f.`value`, f.`item_id`
 	from `".BIT_DB_PREFIX."tiki_tracker_item_fields` f, `".BIT_DB_PREFIX."tiki_tracker_fields` tf
 	where tf.`type` in (?,?) and tf.`field_id`=f.`field_id`";
-    $result=$gBitSystem->query($query,array("t","a"),1,rand(0,$cant-1));
+    $result=$gBitSystem->mDb->query($query,array("t","a"),1,rand(0,$cant-1));
     $res=$result->fetchRow();
     $words=&search_index($res["value"]);
     insert_index($words,'trackeritem',$res["item_id"]);
@@ -239,9 +239,9 @@ function random_refresh_index_tracker_items() {
 
 function refresh_index_oldest(){
   global $gBitSystem;
-  $min = $gBitSystem->getOne("select min(`last_update`) from `".BIT_DB_PREFIX."tiki_searchindex`",array());
+  $min = $gBitSystem->mDb->getOne("select min(`last_update`) from `".BIT_DB_PREFIX."tiki_searchindex`",array());
   if ( !empty( $min ) )
-  { $result = $gBitSystem->query("select `location`,`content_id` from `".BIT_DB_PREFIX."tiki_searchindex` where `last_update`=?",array($min),1);
+  { $result = $gBitSystem->mDb->query("select `location`,`content_id` from `".BIT_DB_PREFIX."tiki_searchindex` where `last_update`=?",array($min),1);
     $res = $result->fetchRow();
     switch($res["location"]) {
       case "wiki":
@@ -284,7 +284,7 @@ function insert_index( &$words, $location, $pContentId ) {
   global $gBitSystem;
   if( !empty( $pContentId ) ) {
 	  $query="delete from `".BIT_DB_PREFIX."tiki_searchindex` where `location`=? and `content_id`=?";
-	  $gBitSystem->query($query,array($location,$pContentId ));
+	  $gBitSystem->mDb->query($query,array($location,$pContentId ));
 
 	  $now= (int) date('U');
 
@@ -293,7 +293,7 @@ function insert_index( &$words, $location, $pContentId ) {
 		  // todo: stopwords
 		  $query="insert into `".BIT_DB_PREFIX."tiki_searchindex`
 				  (`location`,`content_id`,`searchword`,`count`,`last_update`) values (?,?,?,?,?)";
-		  $gBitSystem->query($query,array($location,$pContentId,$key,(int) $value,$now));
+		  $gBitSystem->mDb->query($query,array($location,$pContentId,$key,(int) $value,$now));
 		}
 	  }
 	}

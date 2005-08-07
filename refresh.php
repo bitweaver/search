@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.2 2005/06/28 07:45:57 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.2 2005/06/28 07:45:57 spiderr Exp $
+ * $Id: refresh.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -73,6 +73,7 @@ function refresh_search_index() {
 
 		// hack around php database driver issues when a different database from bitweaver is accessed elsewhere during page  render
 		// this happens in the phpBB package when phpBB is in a different db from bitweaver in MySQL
+		// This only works on some databases
 		global $gBitSystem, $gBitDbName;
 		$gBitSystem->mDb->mDb->SelectDB( $gBitDbName );
 
