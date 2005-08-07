@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.3 2005/08/07 13:22:40 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.4 2005/08/07 16:25:52 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.1.1.1.2.3 2005/08/07 13:22:40 lsces Exp $
+ * $Id: refresh.php,v 1.1.1.1.2.4 2005/08/07 16:25:52 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -75,7 +75,7 @@ function refresh_search_index() {
 		// this happens in the phpBB package when phpBB is in a different db from bitweaver in MySQL
 		// This only works on some databases
 		global $gBitSystem, $gBitDbName;
-		$gBitSystem->getDb()->mDb->SelectDB( $gBitDbName );
+		$gBitSystem->mDb->mDb->SelectDB( $gBitDbName );
 
 		//echo "$location";
 		call_user_func ($location);
