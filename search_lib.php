@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.1 2005/06/27 15:56:42 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.2 2005/08/07 13:22:40 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.1 2005/06/27 15:56:42 lsces Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.2 2005/08/07 13:22:40 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -32,7 +32,7 @@ class SearchLib extends BitBase {
 		foreach ($words as $word) {
 			$word = trim($word);
 
-			$cant = $this->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_search_stats` where `term`=?",array($word));
+			$cant = $this->getDb()->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_search_stats` where `term`=?",array($word));
 
 			if ($cant) {
 				$query = "update `".BIT_DB_PREFIX."tiki_search_stats` set `hits`= `hits` + 1 where `term`=?";
@@ -40,7 +40,7 @@ class SearchLib extends BitBase {
 				$query = "insert into `".BIT_DB_PREFIX."tiki_search_stats` (`term`,`hits`) values (?,1)";
 			}
 
-			$result = $this->query($query,array($word));
+			$result = $this->getDb()->query($query,array($word));
 		}
 	}
 
@@ -121,25 +121,25 @@ class SearchLib extends BitBase {
 		global $search_lru_length;
 		global $search_lru_purge_rate;
 		// delete from wordlist and lru list
-		$this->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($syllable),-1,-1);
-		$this->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($syllable),-1,-1);
+		$this->getDb()->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($syllable),-1,-1);
+		$this->getDb()->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($syllable),-1,-1);
 		// search the searchindex - can take long time
 		$ret=array();
 		if (!isset($search_max_syllwords))
 			$search_max_syllwords = 100;
 		$query="select `searchword`, sum(`count`) as `cnt` from `".BIT_DB_PREFIX."tiki_searchindex`
 			where `searchword` like ? group by `searchword` ORDER BY 2 desc";
-		$result=$this->query($query,array('%'.$syllable.'%'),$search_max_syllwords); // search_max_syllwords: how many different searchwords that contain the syllable are taken into account?. Sortet by number of occurences.
+		$result=$this->getDb()->query($query,array('%'.$syllable.'%'),$search_max_syllwords); // search_max_syllwords: how many different searchwords that contain the syllable are taken into account?. Sortet by number of occurences.
 		while ($res = $result->fetchRow()) {
 			$ret[]=$res["searchword"];
 		}
 		// cache this long running query
 		foreach($ret as $searchword) {
-			$this->query("insert into `".BIT_DB_PREFIX."tiki_searchwords` (`syllable`,`searchword`) values (?,?)",array($syllable,$searchword),-1,-1);
+			$this->getDb()->query("insert into `".BIT_DB_PREFIX."tiki_searchwords` (`syllable`,`searchword`) values (?,?)",array($syllable,$searchword),-1,-1);
 			}
 		// set lru list parameters
 		$now=time();
-		$this->query("insert into `".BIT_DB_PREFIX."tiki_searchsyllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
+		$this->getDb()->query("insert into `".BIT_DB_PREFIX."tiki_searchsyllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
 			array($syllable,(int) $now,(int) $now));
 
 		// at random rate: check length of lru list and purge these that
@@ -148,21 +148,21 @@ class SearchLib extends BitBase {
 		list($usec, $sec) = explode(" ",microtime());
 		srand (ceil($sec+100*$usec));
 		if(rand(1,$search_lru_purge_rate)==1) {
-			$lrulength=$this->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_searchsyllable`",array());
+			$lrulength=$this->getDb()->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_searchsyllable`",array());
 			if ($lrulength > $search_lru_length) { // only purge if lru list is long.
 				//purge oldest
 				$diff=$lrulength-$search_lru_length;
 				$oldwords=array();
 				$query="select `syllable` from `".BIT_DB_PREFIX."tiki_searchsyllable` ORDER BY `last_used` asc";
-				$result=$this->query($query,array(),$diff);
+				$result=$this->getDb()->query($query,array(),$diff);
 				while ($res = $result->fetchRow()) {
 					//we probably cannot delete now. to avoid database deadlocks
 					//we save the words and delete later
 					$oldwords[]=$res["syllable"];
 				}
 				foreach($oldwords as $oldword) {
-					$this->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($oldword),-1,-1);
-					$this->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($oldword),-1,-1);
+					$this->getDb()->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($oldword),-1,-1);
+					$this->getDb()->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($oldword),-1,-1);
 				}
 
 			}
@@ -173,7 +173,7 @@ class SearchLib extends BitBase {
 	function &get_lru_wordlist($syllable) {
 		if(!isset($this->wordlist_cache[$syllable])) {
         		$query="select `searchword` from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?";
-        		$result=$this->query($query,array($syllable));
+        		$result=$this->getDb()->query($query,array($syllable));
         		while ($res = $result->fetchRow()) {
         			$this->wordlist_cache[$syllable][]=$res["searchword"];
         		}
@@ -187,7 +187,7 @@ class SearchLib extends BitBase {
 		foreach($syllables as $syllable) {
 		  //Have a look at the lru list (tiki_searchsyllable)
 		  $bindvars=array($syllable);
-		  $age=time()-$this->getOne("select `last_updated` from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",$bindvars);
+		  $age=time()-$this->getDb()->getOne("select `last_updated` from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",$bindvars);
 		  if(!$age || $age>($search_syll_age*3600)) {// older than search_syll_age hours
 		  	$a=$this->refresh_lru_wordlist($syllable);
 			$ret=array_merge($ret,$a);
@@ -200,7 +200,7 @@ class SearchLib extends BitBase {
 
 		  // update lru list status
 		  $now=time();
-		  $this->query("update `".BIT_DB_PREFIX."tiki_searchsyllable` set `last_used`=? where `syllable`=?",array((int) $now,$syllable));
+		  $this->getDb()->query("update `".BIT_DB_PREFIX."tiki_searchsyllable` set `last_used`=? where `syllable`=?",array((int) $now,$syllable));
 		}
 		return $ret;
 	}
@@ -427,11 +427,11 @@ class SearchLib extends BitBase {
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."'
 			ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON ( b.`blog_id`=s.`content_id` ) WHERE `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."' and s.`content_id`=b.`blog_id`";
-		$cant=$this->getOne($querycant,$words);
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $res['href'] = BitBlog::getBlogUrl( $res["blog_id"] );
@@ -453,11 +453,11 @@ class SearchLib extends BitBase {
 						INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON( bp.`blog_id`=b.`blog_id` )
 					WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'
 					ORDER BY `hits` desc";
-			$result=$this->query($query,$words,$maxRecords,$offset);
+			$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 			$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s where `searchword` in
 				(".implode(',',array_fill(0,count($words),'?')).") and
 				s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'";
-			$cant=$this->getOne($querycant,$words);
+			$cant=$this->getDb()->getOne($querycant,$words);
 			$ret=array();
 			while ($res = $result->fetchRow()) {
 				if( empty( $res['title'] ) ) {
@@ -481,13 +481,13 @@ class SearchLib extends BitBase {
 		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where lower(`searchword`) in
 		(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='article' and
-		".$this->sql_cast("tc.`title`","int")."=a.`article_id` ORDER BY tc.`hits` desc";
-	    $result=$this->query($query,$words,$maxRecords,$offset);
+		".$this->getDb()->sql_cast("tc.`title`","int")."=a.`article_id` ORDER BY tc.`hits` desc";
+	    $result=$this->getDb()->query($query,$words,$maxRecords,$offset);
             $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where `searchword` in
 	     	(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
-		".$this->sql_cast("tc.`title`","int")."=a.`article_id`";
-	    $cant=$this->getOne($querycant,$words);
+		".$this->getDb()->sql_cast("tc.`title`","int")."=a.`article_id`";
+	    $cant=$this->getDb()->getOne($querycant,$words);
 	    $ret=array();
 	    while ($res = $result->fetchRow()) {
 	      $res['href'] = ARTICLES_PKG_URL."read.php?article_id=".urlencode($res["page"]);
@@ -508,11 +508,11 @@ class SearchLib extends BitBase {
 			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."tiki_pages` p ON ( tc.`content_id`=p.`content_id` )
 			  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."'
 			  ORDER BY `count` desc";
-			$result=$this->query($query,$words,$maxRecords,$offset);
+			$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 
 			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."' and tc.`content_id`=p.`content_id`";
-			$cant=$this->getOne($querycant,$words);
+			$cant=$this->getDb()->getOne($querycant,$words);
 
 			$ret=array();
 			while ($res = $result->fetchRow()) {
@@ -535,11 +535,11 @@ class SearchLib extends BitBase {
 			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."tiki_comments` tcc ON ( tc.`content_id`=tcc.`content_id` )
 			  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITCOMMENT_CONTENT_TYPE_GUID."'
 			  ORDER BY `count` desc";
-			$result=$this->query($query,$words,$maxRecords,$offset);
+			$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 
 			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITCOMMENT_CONTENT_TYPE_GUID."' and tc.`content_id`=p.`content_id`";
-			$cant=$this->getOne($querycant,$words);
+			$cant=$this->getDb()->getOne($querycant,$words);
 
 			$ret=array();
 			while ($res = $result->fetchRow()) {
@@ -562,13 +562,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_trackers` t where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='tracker' and
-			".$this->sql_cast("tc.`title`","int")."=t.`tracker_id`";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=t.`tracker_id`";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_trackers` t where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='tracker' and
-			".$this->sql_cast("tc.`title`","int")."=t.`tracker_id`";
-		$cant1=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=t.`tracker_id`";
+		$cant1=$this->getDb()->getOne($querycant,$words);
 		$ret1=array();
 		while ($res = $result->fetchRow()) {
 		  $href = TRACKERS_PKG_URL."view_tracker.php?tracker_id=".urlencode($res["page"]);
@@ -600,13 +600,13 @@ class SearchLib extends BitBase {
 	  `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_tracker_items` t where lower(`searchword`) in
 	  (".implode(',',array_fill(0,count($words),'?')).") and
 	  s.`location`='trackeritem' and
-	  ".$this->sql_cast("tc.`title`","int")."=t.`item_id`";
-	  $result=$this->query($query,$words,$maxRecords,$offset);
+	  ".$this->getDb()->sql_cast("tc.`title`","int")."=t.`item_id`";
+	  $result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 	  $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_tracker_items` t where `searchword` in
 		  (".implode(',',array_fill(0,count($words),'?')).") and
 	  s.`location`='trackeritem' and
-	  ".$this->sql_cast("tc.`title`","int")."=t.`item_id`";
-	  $cant2=$this->getOne($querycant,$words);
+	  ".$this->getDb()->sql_cast("tc.`title`","int")."=t.`item_id`";
+	  $cant2=$this->getDb()->getOne($querycant,$words);
 	  while ($res = $result->fetchRow()) {
 		$href = TRACKERS_PKG_URL."view_tracker_item.php?tracker_id=".urlencode($res["tracker_id"])."&amp;item_id=".urlencode($res["page"]);
 		$ret2[] = array(
@@ -640,13 +640,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_galleries` g where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='imggal' and
-			".$this->sql_cast("tc.`title`","int")."=g.`gallery_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=g.`gallery_id` ORDER BY `hits` desc";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_galleries` g where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='imggal' and
-			".$this->sql_cast("tc.`title`","int")."=g.`gallery_id`";
-		$cant=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=g.`gallery_id`";
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = IMAGEGALS_PKG_URL."browse_gallery.php?gallery_id=".urlencode($res["page"]);
@@ -674,13 +674,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_images` g where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='img' and
-			".$this->sql_cast("tc.`title`","int")."=g.`image_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=g.`image_id` ORDER BY `hits` desc";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_images` g where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='img' and
-			".$this->sql_cast("tc.`title`","int")."=g.`image_id`";
-		$cant=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=g.`image_id`";
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = IMAGEGALS_PKG_URL."browse_image.php?image_id=".urlencode($res["page"]);
@@ -708,13 +708,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_categories` d where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='dir_cat' and
-			".$this->sql_cast("tc.`title`","int")."=d.`category_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=d.`category_id` ORDER BY `hits` desc";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_categories` d where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='dir_cat' and
-			".$this->sql_cast("tc.`title`","int")."=d.`category_id`";
-		$cant=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=d.`category_id`";
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = DIRECTORY_PKG_URL."index.php?parent=".urlencode($res["page"]);
@@ -743,16 +743,16 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_sites` d ,`".BIT_DB_PREFIX."tiki_category_sites` cs where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='dir_site' and
-			".$this->sql_cast("tc.`title`","int")."=d.`site_id` and
+			".$this->getDb()->sql_cast("tc.`title`","int")."=d.`site_id` and
 	cs.`site_id`=d.`site_id`
 	ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_sites` d , `".BIT_DB_PREFIX."tiki_category_sites` cs where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='dir_site' and
-			".$this->sql_cast("tc.`title`","int")."=d.`site_id` and
+			".$this->getDb()->sql_cast("tc.`title`","int")."=d.`site_id` and
 	cs.`site_id`=d.`site_id`";
-		$cant=$this->getOne($querycant,$words);
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = DIRECTORY_PKG_URL."index.php?parent=".urlencode($res["category_id"]);
@@ -781,13 +781,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` f where lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='faq' and
-			".$this->sql_cast("tc.`title`","int")."=f.`faq_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`faq_id` ORDER BY `hits` desc";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` f where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='faq' and
-			".$this->sql_cast("tc.`title`","int")."=f.`faq_id`";
-		$cant=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`faq_id`";
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = FAQS_PKG_URL."view.php?faq_id=".urlencode($res["page"]);
@@ -816,15 +816,15 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` faq, `".BIT_DB_PREFIX."tiki_faq_questions` f where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='faq_question' and
-			".$this->sql_cast("tc.`title`","int")."=f.`question_id` and
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`question_id` and
 	f.`faq_id`=faq.`faq_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` faq, `".BIT_DB_PREFIX."tiki_faq_questions` f  where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='faq_question' and
-			".$this->sql_cast("tc.`title`","int")."=f.`question_id` and
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`question_id` and
 			f.`faq_id`=faq.`faq_id`";
-		$cant=$this->getOne($querycant,$words);
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = FAQS_PKG_URL."view.php?faq_id=".urlencode($res["faq_id"])."#".urlencode($res["page"]);
@@ -853,13 +853,13 @@ class SearchLib extends BitBase {
 			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_forums` f where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='forum' and
-			".$this->sql_cast("tc.`title`","int")."=f.`forum_id` ORDER BY `hits` desc";
-		$result=$this->query($query,$words,$maxRecords,$offset);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`forum_id` ORDER BY `hits` desc";
+		$result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_forums` f where `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='forum' and
-			".$this->sql_cast("tc.`title`","int")."=f.`forum_id`";
-		$cant=$this->getOne($querycant,$words);
+			".$this->getDb()->sql_cast("tc.`title`","int")."=f.`forum_id`";
+		$cant=$this->getDb()->getOne($querycant,$words);
 		$ret=array();
 		while ($res = $result->fetchRow()) {
 		  $href = "tiki-view_forum.php?forum_id=".urlencode($res["page"]);
@@ -888,16 +888,16 @@ class SearchLib extends BitBase {
 		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_comments` f,`".BIT_DB_PREFIX."tiki_forums` fo where `searchword` in
 		(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='forumcomment' and
-		".$this->sql_cast("tc.`title`","int")."=f.`thread_id` and
-		fo.`forum_id`=".$this->sql_cast("f.`object`","int")." ORDER BY `count` desc";
-	  $result=$this->query($query,$words,$maxRecords,$offset);
+		".$this->getDb()->sql_cast("tc.`title`","int")."=f.`thread_id` and
+		fo.`forum_id`=".$this->getDb()->sql_cast("f.`object`","int")." ORDER BY `count` desc";
+	  $result=$this->getDb()->query($query,$words,$maxRecords,$offset);
 
 	  $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_comments` f ,`".BIT_DB_PREFIX."tiki_forums` fo where `searchword` in
 	  	(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='forumcomment' and
-		".$this->sql_cast("tc.`title`","int")."=f.`thread_id` and
-		fo.`forum_id`=".$this->sql_cast("f.`object`","int")." ORDER BY `count` desc";
-	  $cant=$this->getOne($querycant,$words);
+		".$this->getDb()->sql_cast("tc.`title`","int")."=f.`thread_id` and
+		fo.`forum_id`=".$this->getDb()->sql_cast("f.`object`","int")." ORDER BY `count` desc";
+	  $cant=$this->getDb()->getOne($querycant,$words);
 	  $ret=array();
 	  while ($res = $result->fetchRow()) {
 	    $href = "tiki-view_forum_thread.php?comments_parent_id=".urlencode($res["page"])."&amp;forum_id=".urlencode($res["object"]);
