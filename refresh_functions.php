@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.4 2005/08/30 22:31:50 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
+ * $Id: refresh_functions.php,v 1.4 2005/08/30 22:31:50 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -286,7 +286,7 @@ function insert_index( &$words, $location, $pContentId ) {
 	  $query="delete from `".BIT_DB_PREFIX."tiki_searchindex` where `location`=? and `content_id`=?";
 	  $gBitSystem->mDb->query($query,array($location,$pContentId ));
 
-	  $now= (int) date('U');
+	  $now= $gBitSystem->getUTCTime();
 
 	  foreach ($words as $key=>$value) {
 		if (strlen($key)>3) {//todo: make min length configurable
