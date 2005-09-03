@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.4 2005/08/30 22:31:50 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.5 2005/09/03 10:21:31 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.4 2005/08/30 22:31:50 squareing Exp $
+ * $Id: refresh_functions.php,v 1.5 2005/09/03 10:21:31 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -42,9 +42,9 @@ function random_refresh_index_wiki(){
 		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_pages`",array());
 		if($cant>0) {
 			$query="select `content_id` from `".BIT_DB_PREFIX."tiki_pages`";
-    		$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
-    		$res=$result->fetchRow();
-			refresh_index_wiki( $res["content_id"] );
+    		if( $conId=$gBitSystem->mDb->getOne($query,array(),1,rand(0,$cant-1)) ) {
+				refresh_index_wiki( $conId );
+			}
 		}
 	}
 }
