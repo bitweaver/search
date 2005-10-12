@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.4 2005/10/12 15:13:54 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.3 2005/08/07 17:44:39 squareing Exp $
+ * $Id: search_lib.php,v 1.4 2005/10/12 15:13:54 spiderr Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -477,7 +477,7 @@ class SearchLib extends BitBase {
 	  if ($gBitSystem->isPackageActive( 'articles' )  && count($words) >0) {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' ); // Make sure the CONTENT_TYPE_GUID is defined
 	    $query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-	    	a.`description`,tc.`hits`,a.`publish_date`,a.`title` from
+	    	a.`description`,tc.`hits`,a.`publish_date` from
 		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where lower(`searchword`) in
 		(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='article' and
