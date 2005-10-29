@@ -3,27 +3,27 @@
 $tables = array(
 
 'tiki_searchindex' => "
-  searchword C(80) PRIMARY,
-  location C(80) PRIMARY,
-  content_id I4 PRIMARY,
-  count I4 NOTNULL default '1',
-  last_update I4 NOTNULL
+	searchword C(80) PRIMARY,
+	location C(80) PRIMARY,
+	content_id I4 PRIMARY,
+	count I4 NOTNULL default '1',
+	last_update I4 NOTNULL
 ",
 
 'tiki_searchsyllable' => "
-  syllable C(80) PRIMARY,
-  last_used I4 NOTNULL,
-  last_updated I4 NOTNULL
+	syllable C(80) PRIMARY,
+	last_used I4 NOTNULL,
+	last_updated I4 NOTNULL
 ",
 
 'tiki_searchwords' => "
-  syllable C(80) KEY,
-  searchword C(80) KEY
+	syllable C(80) KEY,
+	searchword C(80) KEY
 ",
 
 'tiki_search_stats' => "
-  term C(50) PRIMARY,
-  hits I4
+	term C(50) PRIMARY,
+	hits I4
 "
 
 ) ;
@@ -55,14 +55,14 @@ $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 
 // ### Default Preferences
 $gBitInstaller->registerPreferences( SEARCH_PKG_NAME, array(
-	array('search', 'feature_search_fulltext','y'),
-	array('search', 'feature_search_stats','n'),
-	array('search', 'search_refresh_rate','5'),
-	array('search', 'search_min_wordlength','3'),
-	array('search', 'search_max_syllwords','100'),
-	array('search', 'search_lru_purge_rate','5'),
-	array('search', 'search_lru_length','100'),
-	array('search', 'search_syll_age','48')
+	array(SEARCH_PKG_NAME, 'feature_search_fulltext','y'),
+	array(SEARCH_PKG_NAME, 'feature_search_stats','n'),
+	array(SEARCH_PKG_NAME, 'search_refresh_rate','5'),
+	array(SEARCH_PKG_NAME, 'search_min_wordlength','3'),
+	array(SEARCH_PKG_NAME, 'search_max_syllwords','100'),
+	array(SEARCH_PKG_NAME, 'search_lru_purge_rate','5'),
+	array(SEARCH_PKG_NAME, 'search_lru_length','100'),
+	array(SEARCH_PKG_NAME, 'search_syll_age','48')
 ) );
 
 $moduleHash = array(
