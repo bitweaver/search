@@ -11,37 +11,9 @@
 				{forminput}
 					<select name="where" id="where">
 						<option value="pages">{tr}Entire Site{/tr}</option>
-						{if $gBitSystem->isPackageActive( 'wiki' )}
-							<option value="wikis">{tr}Wiki Pages{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'directory' )}
-							<option value="directory">{tr}Directory{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'galleries' )}
-							<option value="galleries">{tr}Image Gals{/tr}</option>
-							<option value="images">{tr}Images{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'file_galleries' )}
-							<option value="files">{tr}Files{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'articles' )}
-							<option value="articles">{tr}Articles{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'bitforums' )}
-							<option value="forums">{tr}Forums{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'blogs' )}
-							<option value="blogs">{tr}Blogs{/tr}</option>
-							<option value="posts">{tr}Blog Posts{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'faqs' )}
-							<option value="faqs">{tr}FAQs{/tr}</option>
-						{/if}
-						{if $gBitSystem->isPackageActive( 'trackers' )}
-							<option value="trackers">{tr}Tracker{/tr}</option>
-						{/if}
+						{html_options output=$contentTypes values=$contentTypes}
 					</select>
-					{formhelp note=""}
+					{formhelp note="Limit search to the selected Liberty package"}
 				{/forminput}
 			</div>
 

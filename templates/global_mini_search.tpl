@@ -5,16 +5,7 @@
 		<br />
 		<select name="where">
 			<option value="pages">{tr}Entire Site{/tr}</option>
-			{if $gBitSystem->isFeatureActive( 'feature_wiki' )}
-				<option value="wikis">{tr}Wiki Pages{/tr}</option>
-			{/if}
-			{if $gBitSystem->isFeatureActive( 'feature_articles' )}
-				<option value="articles">{tr}Articles{/tr}</option>
-			{/if}
-			{if $gBitSystem->isFeatureActive( 'feature_blogs' )}
-				<option value="blogs">{tr}Blogs{/tr}</option>
-				<option value="posts">{tr}Blog Posts{/tr}</option>
-			{/if}
+			{html_options output=$contentTypes values=$contentTypes selected=$perms[user].level}
 		</select>
 	</div>
 

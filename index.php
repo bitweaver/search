@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.1 2005/07/26 15:50:26 drewslater Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.2 2005/10/30 10:09:03 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -15,6 +15,11 @@ require_once( SEARCH_PKG_PATH.'/search_lib.php');
 $searchlib = &new SearchLib();
 
 $gBitSystem->verifyPackage( 'search' );
+
+foreach( $gLibertySystem->mContentTypes as $cType ) {
+	$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+}
+$gBitSmarty->assign( 'contentTypes', $contentTypes );
 
 if( !empty($_REQUEST["highlight"]) ) {
   $_REQUEST["words"]=$_REQUEST["highlight"];
