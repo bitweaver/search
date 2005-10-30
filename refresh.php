@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.4 2005/08/07 16:25:52 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.1.1.1.2.4 2005/08/07 16:25:52 lsces Exp $
+ * $Id: refresh.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -36,31 +36,12 @@ function refresh_search_index() {
 			// if wiki is active, let's always refresh
 			random_refresh_index_wiki();
 		}
-		if( $gBitSystem->isPackageActive( 'forums' ) ) {
-			$locs[]="random_refresh_index_forum";
-		}
-		if( $gBitSystem->isPackageActive( 'trackers' ) ) {
-			$locs[]="random_refresh_index_trackers";
-			$locs[]="random_refresh_index_tracker_items";
-		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
 			$locs[]="random_refresh_index_articles";
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 			$locs[]="random_refresh_index_blogs";
 			$locs[]="random_refresh_index_blog_posts";
-		}
-		if( $gBitSystem->isPackageActive( 'faqs' ) ) {
-			$locs[]="random_refresh_index_faqs";
-			$locs[]="random_refresh_index_faq_questions";
-		}
-		if( $gBitSystem->isPackageActive( 'directory' ) ) {
-			$locs[]="random_refresh_index_dir_cats";
-			$locs[]="random_refresh_index_dir_sites";
-		}
-		if( $gBitSystem->isPackageActive( 'imagegals' ) ) {
-			$locs[]="random_refresh_imggals";
-			$locs[]="random_refresh_img";
 		}
 
 		// comments can be everywhere?

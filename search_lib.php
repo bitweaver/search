@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.4 2005/09/07 07:21:35 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.4 2005/09/07 07:21:35 squareing Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -81,9 +81,6 @@ class SearchLib extends BitBase {
 				case "wikis":
 				  return $this->find_part_wiki($words,$offset, $maxRecords);
 				  break;
-				case "bitforums":
-				  return $this->find_part_forums($words,$offset, $maxRecords);
-				  break;
 				case "articles":
 				  return $this->find_part_articles($words,$offset, $maxRecords);
 				  break;
@@ -92,21 +89,6 @@ class SearchLib extends BitBase {
 				  break;
 				case "posts":
 				  return $this->find_part_blog_posts($words,$offset, $maxRecords);
-				  break;
-				case "faqs":
-				  return $this->find_part_faqs($words,$offset, $maxRecords);
-				  break;
-				case "directory":
-				  return $this->find_part_directory($words,$offset, $maxRecords);
-				  break;
-				case "galleries":
-				  return $this->find_part_imggals($words,$offset, $maxRecords);
-				  break;
-				case "images":
-				  return $this->find_part_img($words,$offset, $maxRecords);
-				  break;
-				case "trackers":
-				  return $this->find_part_trackers($words,$offset, $maxRecords);
 				  break;
 
 				default:
@@ -185,22 +167,22 @@ class SearchLib extends BitBase {
 		$ret=array();
 		global $search_syll_age;
 		foreach($syllables as $syllable) {
-		  //Have a look at the lru list (tiki_searchsyllable)
-		  $bindvars=array($syllable);
-		  $age=time()-$this->mDb->getOne("select `last_updated` from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",$bindvars);
-		  if(!$age || $age>($search_syll_age*3600)) {// older than search_syll_age hours
-		  	$a=$this->refresh_lru_wordlist($syllable);
-			$ret=array_merge($ret,$a);
-		  } else {
+			//Have a look at the lru list (tiki_searchsyllable)
+			$bindvars=array($syllable);
+			$age=time()-$this->mDb->getOne("select `last_updated` from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",$bindvars);
+			if(!$age || $age>($search_syll_age*3600)) {// older than search_syll_age hours
+				$a=$this->refresh_lru_wordlist($syllable);
+				$ret=array_merge($ret,$a);
+			} else {
 
-		  	// get wordlist
-		  	if (is_array($this->get_lru_wordlist($syllable)))
-			  $ret=array_merge($ret,$this->get_lru_wordlist($syllable));
-		  }
+				// get wordlist
+				if (is_array($this->get_lru_wordlist($syllable)))
+				$ret=array_merge($ret,$this->get_lru_wordlist($syllable));
+			}
 
-		  // update lru list status
-		  $now=time();
-		  $this->mDb->query("update `".BIT_DB_PREFIX."tiki_searchsyllable` set `last_used`=? where `syllable`=?",array((int) $now,$syllable));
+			// update lru list status
+			$now=time();
+			$this->mDb->query("update `".BIT_DB_PREFIX."tiki_searchsyllable` set `last_used`=? where `syllable`=?",array((int) $now,$syllable));
 		}
 		return $ret;
 	}
@@ -217,36 +199,12 @@ class SearchLib extends BitBase {
 		return $this->find_exact_articles($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_forums($words,$offset, $maxRecords) {
-		return $this->find_exact_forums($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
 	function &find_part_blogs($words,$offset, $maxRecords) {
 		return $this->find_exact_blogs($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
 	function &find_part_blog_posts($words,$offset, $maxRecords) {
 		return $this->find_exact_blog_posts($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function &find_part_faqs($words,$offset, $maxRecords) {
-		return $this->find_exact_faqs($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function &find_part_directory($words,$offset, $maxRecords) {
-		return $this->find_exact_directory($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function &find_part_imggals($words,$offset, $maxRecords) {
-		return $this->find_exact_imggals($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function &find_part_img($words,$offset, $maxRecords) {
-		return $this->find_exact_img($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function &find_part_trackers($words,$offset, $maxRecords) {
-		return $this->find_exact_trackers($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
 	function &find_part_all($words,$offset, $maxRecords) {
@@ -278,35 +236,12 @@ class SearchLib extends BitBase {
 			$blogpostsresults=$this->find_part_blog_posts($words,$offset, $maxRecords);
 			$cant += $blogresults["cant"] + $blogpostsresults["cant"];
 		}
-		if( $gBitSystem->isPackageActive( 'faqs' ) ) {
-			$faqresults=$this->find_part_faqs($words,$offset, $maxRecords);
-			$cant += $faqresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'directory' ) ) {
-			$dirresults=$this->find_part_directory($words,$offset, $maxRecords);
-			$cant += $dirresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'imagegals' ) ) {
-			$imggalsresults=$this->find_part_imggals($words,$offset, $maxRecords);
-			$imgresults=$this->find_part_img($words,$offset, $maxRecords);
-			$cant += $imgresults["cant"]+$imggalsresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'trackers' ) ) {
-			$trackerresults=$this->find_part_trackers($words,$offset, $maxRecords);
-			$cant += $trackerresults["cant"];
-		}
 
 		//merge the results, use @ to silence the warnings
 		$res=array();
 		$res["data"] = @array_merge($commentresults["data"],$wikiresults["data"]
 			,$artresults["data"]
 			,$blogresults["data"],$blogpostsresults["data"]
-//			,$forumresults["data"]
-//			,$faqresults["data"]
-//			,$dirresults["data"]
-//			,$imggalsresults["data"]
-//			,$imgresults["data"]
-//			,$trackerresults["data"]
 			);
 		$res["cant"] = $cant;
 		return ($res);
@@ -322,9 +257,6 @@ class SearchLib extends BitBase {
 			case "wikis":
 			  return $this->find_exact_wiki($words,$offset, $maxRecords);
 			  break;
-			case "forums":
-			  return $this->find_exact_forums($words,$offset, $maxRecords);
-			  break;
 			case "articles":
 			  return $this->find_exact_articles($words,$offset, $maxRecords);
 			  break;
@@ -333,21 +265,6 @@ class SearchLib extends BitBase {
 			  break;
 			case "posts":
 			  return $this->find_exact_blog_posts($words,$offset, $maxRecords);
-			  break;
-			case "faqs":
-			  return $this->find_exact_faqs($words,$offset, $maxRecords);
-			  break;
-			case "directory":
-			  return $this->find_exact_directory($words,$offset, $maxRecords);
-			  break;
-			case "galleries":
-			  return $this->find_exact_imggals($words,$offset, $maxRecords);
-			  break;
-			case "images":
-			  return $this->find_exact_img($words,$offset, $maxRecords);
-			  break;
-			case "trackers":
-			  return $this->find_exact_trackers($words,$offset, $maxRecords);
 			  break;
 
 			default:
@@ -370,25 +287,9 @@ class SearchLib extends BitBase {
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
 			$artresults=$this->find_exact_articles($words,$offset, $maxRecords);
 		}
-		if( $gBitSystem->isPackageActive( 'bitforums' ) ) {
-			$forumresults=$this->find_exact_forums($words,$offset, $maxRecords);
-		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 			$blogresults=$this->find_exact_blogs($words,$offset, $maxRecords);
 			$blogpostsresults=$this->find_exact_blog_posts($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'faqs' ) ) {
-			$faqresults=$this->find_exact_faqs($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'directory' ) ) {
-			$dirresults=$this->find_exact_directory($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'imagegals' ) ) {
-			$imggalsresults=$this->find_exact_imggals($words,$offset, $maxRecords);
-			$imgresults=$this->find_exact_img($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'trackers' ) ) {
-			$trackerresults=$this->find_exact_trackers($words,$offset, $maxRecords);
 		}
 
 		//merge the results, use @ to silence the warnings
@@ -396,21 +297,9 @@ class SearchLib extends BitBase {
 		$res["data"]=@array_merge($wikiresults["data"],
 			$commentresults["data"],$artresults["data"],
 			$blogresults["data"],$blogpostsresults["data"]
-//			,$faqresults["data"]
-//			,$forumresults["data"]
-//			,$dirresults["data"]
-//			,$imggalsresults["data"]
-//			,$imgresults["data"]
-//			,$trackerresults["data"]
 			);
 		$res["cant"]=@($wikiresults["cant"]+$artresults["cant"]+
 			$blogresults["cant"]+$blogpostsresults["cant"]
-//			+$faqresults["cant"]+
-//			+$forumresults["cant"]
-//			+$dirresults["cant"]
-//			+$imggalsresults["cant"]+
-//			+$imgresults["cant"]
-//			+$trackerresults["cant"]
 			);
 		return ($res);
 	}
@@ -552,371 +441,6 @@ class SearchLib extends BitBase {
 			return array('data' => array(),'cant' => 0);
 		}
 	}
-
-/*
-	function &find_exact_trackers($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'trackers' ) && count($words) >0 ) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			t.`description`,t.`last_modified`,t.`name` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_trackers` t where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='tracker' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=t.`tracker_id`";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_trackers` t where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='tracker' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=t.`tracker_id`";
-		$cant1=$this->mDb->getOne($querycant,$words);
-		$ret1=array();
-		while ($res = $result->fetchRow()) {
-		  $href = TRACKERS_PKG_URL."view_tracker.php?tracker_id=".urlencode($res["page"]);
-		  $ret1[] = array(
-			'title' => $res["name"],
-			'location' => tra("Tracker"),
-			'data' => substr($res["description"],0,250),
-			'hits' => tra("Unknown"),
-			'last_modified' => $res["last_modified"],
-			'href' => $href,
-			'relevance' => 1
-		  );
-		}
-
-	//tracker items
-	$ret2=array();
-	$cant2=0;
-	if ($cant1 < $offset+$maxRecords) {
-
-	  //new offset and maxRecords
-	  $offset-=$cant1;
-	  if ($offset < 0) {
-		$maxRecords+=$offset;
-	$offset=0;
-	  }
-
-	  $query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-		  t.`last_modified`,t.`tracker_id` from
-	  `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_tracker_items` t where lower(`searchword`) in
-	  (".implode(',',array_fill(0,count($words),'?')).") and
-	  s.`location`='trackeritem' and
-	  ".$this->mDb->sql_cast("tc.`title`","int")."=t.`item_id`";
-	  $result=$this->mDb->query($query,$words,$maxRecords,$offset);
-	  $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_tracker_items` t where `searchword` in
-		  (".implode(',',array_fill(0,count($words),'?')).") and
-	  s.`location`='trackeritem' and
-	  ".$this->mDb->sql_cast("tc.`title`","int")."=t.`item_id`";
-	  $cant2=$this->mDb->getOne($querycant,$words);
-	  while ($res = $result->fetchRow()) {
-		$href = TRACKERS_PKG_URL."view_tracker_item.php?tracker_id=".urlencode($res["tracker_id"])."&amp;item_id=".urlencode($res["page"]);
-		$ret2[] = array(
-		  'title' => $res["page"],
-	  'location' => tra("Trackeritem"),
-	  'data' => tra("Unknown"),
-	  'hits' => tra("Unknown"),
-	  'last_modified' => $res["last_modified"],
-	  'href' => $href,
-	  'relevance' => 1
-		);
-	  }
-	}
-	$ret=array();
-	$ret["data"]=array_merge($ret1,$ret2);
-	$ret["cant"]=$cant1+$cant2;
-	return $ret;
-
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-
-
-	function &find_exact_imggals($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'imagegals' )  && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			g.`description`,g.`hits`,g.`last_modified`,g.`name` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_galleries` g where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='imggal' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=g.`gallery_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_galleries` g where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='imggal' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=g.`gallery_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = IMAGEGALS_PKG_URL."browse_gallery.php?gallery_id=".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => $res["name"],
-			'location' => tra("Image Gallery"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["last_modified"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		return array('data' => $ret,'cant' => $cant);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function &find_exact_img($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'imagegals' ) && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			g.`description`,g.`hits`,g.`created`,g.`name` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_images` g where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='img' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=g.`image_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_images` g where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='img' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=g.`image_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = IMAGEGALS_PKG_URL."browse_image.php?image_id=".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => $res["name"],
-			'location' => tra("Image"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["created"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		return array('data' => $ret,'cant' => $cant);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function &find_exact_directory($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'directory' ) && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			d.`description`,d.`hits`,d.`name` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_categories` d where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='dir_cat' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=d.`category_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_categories` d where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='dir_cat' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=d.`category_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = DIRECTORY_PKG_URL."index.php?parent=".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => $res["name"],
-			'location' => tra("Directory category"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => time(), //not determinable
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		$dsiteres=$this->find_exact_directory_sites($words,$offset, $maxRecords);
-		return array('data' => array_merge($ret,$dsiteres["data"]),'cant' => $cant+$dsiteres["cant"]);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function &find_exact_directory_sites($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'directory' ) && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			d.`description`,d.`hits`,d.`name`,d.`last_modified`,cs.`category_id` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_sites` d ,`".BIT_DB_PREFIX."tiki_category_sites` cs where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='dir_site' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=d.`site_id` and
-	cs.`site_id`=d.`site_id`
-	ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_directory_sites` d , `".BIT_DB_PREFIX."tiki_category_sites` cs where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='dir_site' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=d.`site_id` and
-	cs.`site_id`=d.`site_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = DIRECTORY_PKG_URL."index.php?parent=".urlencode($res["category_id"]);
-		  $ret[] = array(
-			'title' => $res["name"],
-			'location' => tra("Directory"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["last_modified"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		return array('data' => $ret,'cant' => $cant);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-
-	function &find_exact_faqs($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'faqs' )  && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			f.`description`,f.`hits`,f.`created`,f.`title` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` f where lower(`searchword`) in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='faq' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`faq_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` f where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='faq' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`faq_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = FAQS_PKG_URL."view.php?faq_id=".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => $res["title"],
-			'location' => tra("FAQ"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["created"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		$fquesres=$this->find_exact_faqquestions($words,$offset, $maxRecords);
-		return array('data' => array_merge($ret,$fquesres["data"]),'cant' => $cant+$fquesres["cant"]);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function &find_exact_faqquestions($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'faqs' ) && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			f.`question`,faq.`hits`,faq.`created`,faq.`title`,f.`answer`,f.`faq_id` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` faq, `".BIT_DB_PREFIX."tiki_faq_questions` f where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='faq_question' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`question_id` and
-	f.`faq_id`=faq.`faq_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_faqs` faq, `".BIT_DB_PREFIX."tiki_faq_questions` f  where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='faq_question' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`question_id` and
-			f.`faq_id`=faq.`faq_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = FAQS_PKG_URL."view.php?faq_id=".urlencode($res["faq_id"])."#".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => substr($res["question"],0,40),
-			'location' => tra("FAQ")."::".$res["title"],
-			'data' => substr($res["answer"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["created"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		return array('data' => $ret,'cant' => $cant);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-
-	function &find_exact_forums($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'tiki_forums' ) && count($words) >0) {
-		$query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-			f.`description`,f.`hits`,f.`last_post`,f.`name` from
-			`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_forums` f where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='forum' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`forum_id` ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_forums` f where `searchword` in
-			(".implode(',',array_fill(0,count($words),'?')).") and
-			s.`location`='forum' and
-			".$this->mDb->sql_cast("tc.`title`","int")."=f.`forum_id`";
-		$cant=$this->mDb->getOne($querycant,$words);
-		$ret=array();
-		while ($res = $result->fetchRow()) {
-		  $href = "tiki-view_forum.php?forum_id=".urlencode($res["page"]);
-		  $ret[] = array(
-			'title' => $res["name"],
-			'location' => tra("Forum"),
-			'data' => substr($res["description"],0,250),
-			'hits' => $res["hits"],
-			'last_modified' => $res["last_post"],
-			'href' => $href,
-			'relevance' => $res["hits"]
-		  );
-		}
-		$fcommres=$this->find_exact_forumcomments($words,$offset, $maxRecords);
-		return array('data' => array_merge($ret,$fcommres["data"]),'cant' => $cant+$fcommres["cant"]);
-	  } else {
-		return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function &find_exact_forumcomments($words,$offset, $maxRecords) {
-          global $gBitSystem;
-          if ($gBitSystem->isPackageActive( 'tiki_forums' ) && count($words) >0) {
-	  $query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`,, s.`location`, s.`last_update`, s.`count`,
-	  	f.`data`,f.`hits`,f.`comment_date`,f.`object`,f.`title`,fo.`name` from
-		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_comments` f,`".BIT_DB_PREFIX."tiki_forums` fo where `searchword` in
-		(".implode(',',array_fill(0,count($words),'?')).") and
-		s.`location`='forumcomment' and
-		".$this->mDb->sql_cast("tc.`title`","int")."=f.`thread_id` and
-		fo.`forum_id`=".$this->mDb->sql_cast("f.`object`","int")." ORDER BY `count` desc";
-	  $result=$this->mDb->query($query,$words,$maxRecords,$offset);
-
-	  $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_comments` f ,`".BIT_DB_PREFIX."tiki_forums` fo where `searchword` in
-	  	(".implode(',',array_fill(0,count($words),'?')).") and
-		s.`location`='forumcomment' and
-		".$this->mDb->sql_cast("tc.`title`","int")."=f.`thread_id` and
-		fo.`forum_id`=".$this->mDb->sql_cast("f.`object`","int")." ORDER BY `count` desc";
-	  $cant=$this->mDb->getOne($querycant,$words);
-	  $ret=array();
-	  while ($res = $result->fetchRow()) {
-	    $href = "tiki-view_forum_thread.php?comments_parent_id=".urlencode($res["page"])."&amp;forum_id=".urlencode($res["object"]);
-	    $ret[] = array(
-	      'title' => $res["title"],
-	      'location' => tra("Forum")."::".$res["name"],
-	      'data' => substr($res["data"],0,250),
-	      'hits' => $res["hits"],
-	      'last_modified' => $res["comment_date"],
-	      'href' => $href,
-	      'relevance' => $res["count"]
-	    );
-	  }
-	  return array('data' => $ret,'cant' => $cant);
-	  }else {
-	  return array('data' => array(),'cant' => 0);
-	  }
-	}
-*/
 
 } # class SearchLib
 
