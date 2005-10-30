@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.1 2005/07/26 15:50:27 drewslater Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.2 2005/10/30 09:27:43 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -20,7 +20,7 @@ $formSearchToggles = array(
 $formSearchInts = array(
 	'search_refresh_rate' => array(
 		'label' => 'Search Refresh Rate',
-		'note' => 'not quite sure what this does',
+		'note' => 'Varies the rate at which updates to the search index are made, 1 = every page read, while rate>1 will introduce a random chance of a refresh every "rate" pages',
 	),
 	'search_min_wordlength' => array(
 		'label' => 'Minimum number of letters for search words',
@@ -32,15 +32,15 @@ $formSearchInts = array(
 	),
 	'search_syll_age' => array(
 		'label' => 'Age in hours of search cache',
-		'note' => 'Define the Maximum age of cached serach results for any given syllable',
+		'note' => 'Define the Maximum age of cached search results for any given syllable. The results cache will be used to provide a search result if it is available, and will be cleared after either the age, or when the results cache reaches it\'s limit',
 	),
 	'search_lru_purge_rate' => array(
 		'label' => 'Least Recently Used (LRU) list purging rate',
-		'note' => '???',
+		'note' => 'Purge the results cache every "rate" pages. This will keep space available in the cache for new seach results',
 	),
 	'search_lru_length' => array(
 		'label' => 'Least Recently Used (LRU) list length',
-		'note' => '???',
+		'note' => 'Limit the results cache to this number of entries',
 	),
 );
 if (isset($_REQUEST["searchprefs"])) {
