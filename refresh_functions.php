@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.6 2005/10/30 09:29:51 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.7 2005/11/18 21:55:07 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,12 +8,12 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.6 2005/10/30 09:29:51 lsces Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.7 2005/11/18 21:55:07 spiderr Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
  */
- 
+
 /**
  * random_refresh_index_comments
  */
@@ -141,7 +141,7 @@ function refresh_index_oldest(){
 	}
 }
 
-function &search_index($data) {
+function search_index($data) {
 	$data=strip_tags($data);
 	// split into words
 	$sstrings=preg_split("/[\W]+/",$data,-1,PREG_SPLIT_NO_EMPTY);
