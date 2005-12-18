@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.6 2005/11/22 07:27:43 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.7 2005/12/18 22:31:56 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.6 2005/11/22 07:27:43 squareing Exp $
+ * $Id: refresh_functions.php,v 1.7 2005/12/18 22:31:56 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -27,7 +27,7 @@ function random_refresh_index_comments() {
 		$query="select tcm.*,tc.`title`,tc.`data` from `".BIT_DB_PREFIX."tiki_comments` tcm INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON(tcm.`content_id`=tc.`content_id` )";
 		$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 		$res=$result->fetchRow();
-		$words=&search_index($res["title"]." ".$res["data"]);
+		$words=search_index($res["title"]." ".$res["data"]);
 		insert_index($words, BITCOMMENT_CONTENT_TYPE_GUID, $res["comment_id"]);
 	}
 }
@@ -57,7 +57,7 @@ function refresh_index_wiki( $pContentId ) {
 		if( $indexPage->load() ) {
 			$pdata = $indexPage->parseData();
 			$pdata.=" ".$indexPage->parseData( $indexPage->mInfo["description"] );
-			$words=&search_index( $pdata );
+			$words=search_index( $pdata );
 			insert_index( $words, BITPAGE_CONTENT_TYPE_GUID, $pContentId );
 		}
 	}
@@ -71,7 +71,7 @@ function refresh_index_content( $pContentId ) {
 		if( $indexPage->load() ) {
 			$pdata = $indexPage->parseData();
 			$pdata.=" ".$indexPage->parseData( $indexPage->mInfo["description"] );
-			$words=&search_index( $pdata );
+			$words=search_index( $pdata );
 			insert_index( $words, BITPAGE_CONTENT_TYPE_GUID, $pContentId );
 		}
 	}
@@ -87,7 +87,7 @@ function random_refresh_index_blogs() {
 			$query="select tb.*, uu.`login` as `user`, uu.`real_name` from `".BIT_DB_PREFIX."tiki_blogs` tb, `".BIT_DB_PREFIX."users_users` uu WHERE uu.`user_id` = tb.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
-			$words=&search_index($res["title"]." ".$res["user"]." ".$res["description"]);
+			$words=search_index($res["title"]." ".$res["user"]." ".$res["description"]);
 			insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $res["blog_id"]);
 		}
 	}
@@ -105,7 +105,7 @@ function random_refresh_index_blog_posts() {
 					WHERE tbp.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
-			$words=&search_index($res["title"]." ".$res["user"]." ".$res["data"]);
+			$words=search_index($res["title"]." ".$res["user"]." ".$res["data"]);
 			insert_index($words, BITBLOGPOST_CONTENT_TYPE_GUID, $res["content_id"]);
 		}
 	}
@@ -121,7 +121,7 @@ function random_refresh_index_articles() {
 			$query="select * from `".BIT_DB_PREFIX."tiki_articles`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
-			$words=&search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["body"]." ".$res["author"]);
+			$words=search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["body"]." ".$res["author"]);
 			insert_index($words,'article',$res["article_id"]);
 		}
 	}
