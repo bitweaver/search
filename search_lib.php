@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.5 2005/11/22 07:27:43 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.6 2006/01/15 07:59:28 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.5 2005/11/22 07:27:43 squareing Exp $
+ * $Id: search_lib.php,v 1.6 2006/01/15 07:59:28 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -44,7 +44,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function &find($where,$words,$offset, $maxRecords) {
+	function find($where,$words,$offset, $maxRecords) {
 		$words = strtolower($words);
 		$exact=$this->find_exact($where,$words,$offset, $maxRecords);
 		$part=$this->find_part($where,$words,$offset, $maxRecords);
@@ -71,7 +71,7 @@ class SearchLib extends BitBase {
 	}
 
 
-	function &find_part($where,$words,$offset, $maxRecords) {
+	function find_part($where,$words,$offset, $maxRecords) {
 		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
 		if (count($words)>0) {
 			switch($where) {
@@ -98,7 +98,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function &refresh_lru_wordlist($syllable) {
+	function refresh_lru_wordlist($syllable) {
 		global $search_max_syllwords;
 		global $search_lru_length;
 		global $search_lru_purge_rate;
@@ -152,7 +152,7 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function &get_lru_wordlist($syllable) {
+	function get_lru_wordlist($syllable) {
 		if(!isset($this->wordlist_cache[$syllable])) {
         		$query="select `searchword` from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?";
         		$result=$this->mDb->query($query,array($syllable));
@@ -163,7 +163,7 @@ class SearchLib extends BitBase {
 		return $this->wordlist_cache[$syllable];
 	}
 
-	function &get_wordlist_from_syllables($syllables) {
+	function get_wordlist_from_syllables($syllables) {
 		$ret=array();
 		global $search_syll_age;
 		foreach($syllables as $syllable) {
@@ -187,27 +187,27 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function &find_part_bitcomment($words,$offset, $maxRecords) {
+	function find_part_bitcomment($words,$offset, $maxRecords) {
 		return $this->find_exact_bitcomment($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_wiki($words,$offset, $maxRecords) {
+	function find_part_wiki($words,$offset, $maxRecords) {
 		return $this->find_exact_wiki($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_articles($words,$offset, $maxRecords) {
+	function find_part_articles($words,$offset, $maxRecords) {
 		return $this->find_exact_articles($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_blogs($words,$offset, $maxRecords) {
+	function find_part_blogs($words,$offset, $maxRecords) {
 		return $this->find_exact_blogs($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_blog_posts($words,$offset, $maxRecords) {
+	function find_part_blog_posts($words,$offset, $maxRecords) {
 		return $this->find_exact_blog_posts($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
 	}
 
-	function &find_part_all($words,$offset, $maxRecords) {
+	function find_part_all($words,$offset, $maxRecords) {
 		global $gBitSystem;
 		$commentresults["data"] = array( );
 		$wikiresults["data"] = array();
@@ -247,7 +247,7 @@ class SearchLib extends BitBase {
 		return ($res);
 	}
 
-	function &find_exact($where,$words,$offset, $maxRecords) {
+	function find_exact($where,$words,$offset, $maxRecords) {
 		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
 		if (count($words)>0) {
 			switch($where) {
@@ -274,7 +274,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function &find_exact_all($words,$offset, $maxRecords) {
+	function find_exact_all($words,$offset, $maxRecords) {
 		global $gBitSystem;
 		$commentresults=$this->find_exact_bitcomment($words,$offset, $maxRecords);
 		$wikiresults["data"] = array();
@@ -304,7 +304,7 @@ class SearchLib extends BitBase {
 		return ($res);
 	}
 
-	function &find_exact_blogs($words,$offset, $maxRecords) {
+	function find_exact_blogs($words,$offset, $maxRecords) {
 	  global $gBitSystem;
 	  $ret =  array('data' => array(),'cant' => 0);
 	  if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
@@ -331,7 +331,7 @@ class SearchLib extends BitBase {
 	  return $ret;
 	}
 
-	function &find_exact_blog_posts($words,$offset, $maxRecords) {
+	function find_exact_blog_posts($words,$offset, $maxRecords) {
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
 			require_once( BLOGS_PKG_PATH.'BitBlogPost.php' ); // Make sure the CONTENT_TYPE_GUID is defined
@@ -361,7 +361,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function &find_exact_articles($words,$offset, $maxRecords) {
+	function find_exact_articles($words,$offset, $maxRecords) {
       global $gBitSystem;
 	  if ($gBitSystem->isPackageActive( 'articles' )  && count($words) >0) {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' ); // Make sure the CONTENT_TYPE_GUID is defined
@@ -388,7 +388,7 @@ class SearchLib extends BitBase {
 	  }
 	}
 
-	function &find_exact_wiki($words,$offset, $maxRecords) {
+	function find_exact_wiki($words,$offset, $maxRecords) {
 		global $gPage;
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
@@ -415,7 +415,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function &find_exact_bitcomment($words,$offset, $maxRecords) {
+	function find_exact_bitcomment($words,$offset, $maxRecords) {
 		global $gPage;
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
