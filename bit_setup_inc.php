@@ -3,7 +3,7 @@ global $gBitSystem;
 $gBitSystem->registerPackage( 'search', dirname( __FILE__).'/' );
 
 if( $gBitSystem->isPackageActive( 'search' ) ) {
-	$gBitSystem->registerAppMenu( SEARCH_PKG_DIR, 'Search', SEARCH_PKG_URL.'index.php', '', 'search');
+	$gBitSystem->registerAppMenu( SEARCH_PKG_NAME, ucfirst( SEARCH_PKG_DIR ), SEARCH_PKG_URL.'index.php', '', 'search');
 
 	// Stuff found in kernel that is wiki dependent - wolff_borg
 	// **********  SEARCH  ************
