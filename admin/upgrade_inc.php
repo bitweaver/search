@@ -5,7 +5,7 @@ global $gBitSystem, $gUpgradeFrom, $gUpgradeTo;
 $upgrades = array(
 
 'BONNIE' => array(
-	'CLYDE' => array(
+	'BWR1' => array(
 // STEP 1 - Data is transient, so let's recreate the table with proper  multi-column keys
 array( 'DATADICT' => array(
 	array( 'DROPTABLE' => array(
