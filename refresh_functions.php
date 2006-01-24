@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.9 2006/01/21 22:35:24 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.10 2006/01/24 21:49:44 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.9 2006/01/21 22:35:24 lsces Exp $
+ * $Id: refresh_functions.php,v 1.10 2006/01/24 21:49:44 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -124,7 +124,7 @@ function random_refresh_index_articles() {
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["data"]." ".$res["author"]);
-			insert_index($words,'article',$res["article_id"]);
+			insert_index($words,BITARTICLE_CONTENT_TYPE_GUID,$res["article_id"]);
 		}
 	}
 }
