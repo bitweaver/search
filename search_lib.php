@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.7 2006/01/24 21:36:21 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.8 2006/01/25 22:59:46 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.7 2006/01/24 21:36:21 lsces Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.8 2006/01/25 22:59:46 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -369,7 +369,7 @@ class SearchLib extends BitBase {
 	    	a.`description`,tc.`hits`,a.`publish_date` from
 		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where lower(`searchword`) in
 		(".implode(',',array_fill(0,count($words),'?')).") and
-		s.`location`=BITARTICLE_CONTENT_TYPE_GUID and
+		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
 		".$this->mDb->sql_cast("tc.`title`","int")."=a.`article_id` ORDER BY tc.`hits` desc";
 	    $result=$this->mDb->query($query,$words,$maxRecords,$offset);
             $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where `searchword` in
