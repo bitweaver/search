@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.6 2006/01/27 06:54:17 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.1.1.1.2.5 2005/10/30 09:29:51 lsces Exp $
+ * $Id: refresh.php,v 1.1.1.1.2.6 2006/01/27 06:54:17 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -17,6 +17,7 @@
 /**
  * refresh_search_index
  */
+
 function refresh_search_index() {
 	global $gBitSystem;
 	// first write close the session. refreshing can take a huge amount of time
@@ -34,22 +35,24 @@ function refresh_search_index() {
 		$locs=array();
 		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
 			// if wiki is active, let's always refresh
-			random_refresh_index_wiki();
+			random_refresh_index("wiki");
 		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$locs[]="random_refresh_index_articles";
+			$locs[]="random_refresh_index('articles')";
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
+			//Can't use the new random function with blogs - they aren'tin tiki_content yet.
 			$locs[]="random_refresh_index_blogs";
-			$locs[]="random_refresh_index_blog_posts";
+			//Can use new function for blog_posts though ...
+			$locs[]="random_refresh_index('blog_posts')";
 		}
 
 		// comments can be everywhere?
-		$locs[]="random_refresh_index_comments";
+		$locs[]="random_refresh_index('comments')";
 		// some refreshes to enhance the refreshing stats
 		$locs[]="refresh_index_oldest";
 		//print_r($locs);
-		$location=$locs[rand(0,count($locs)-1)];
+		$location = $locs[rand(0, count($locs) - 1)];
 		// random refresh
 
 		// hack around php database driver issues when a different database from bitweaver is accessed elsewhere during page  render
