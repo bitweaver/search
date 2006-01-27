@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.2 2005/10/30 09:27:43 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.3 2006/01/27 06:52:02 seannerd Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -15,6 +15,10 @@ $formSearchToggles = array(
 		'label' => 'Search Statistics',
 		'note' => 'Record searches made and their frequency.',
 //		'page' => 'SearchStats',
+	),
+	'search_index_on_submit' => array(
+		'label' => 'Index On Submit',
+		'note' => 'Index articles, blogs and wiki pages immdiately on submission. If unchecked, pages will be updated randomly according the the refresh rate below.',
 	),
 );
 $formSearchInts = array(
