@@ -8,8 +8,12 @@ if( $gBitSystem->isPackageActive( 'search' ) ) {
 	// Stuff found in kernel that is wiki dependent - wolff_borg
 	// **********  SEARCH  ************
 	// Register the search refresh function
-	include_once( SEARCH_PKG_PATH.'refresh.php' );
-	register_shutdown_function("refresh_search_index");
+	// But only if the Index On Submit isn't set
+	$sset = $gBitSystem->getPreference('search_index_on_submit');
+	if( !$sset == 'y' ) {
+		include_once( SEARCH_PKG_PATH.'refresh.php' );
+		register_shutdown_function("refresh_search_index");
+	}
 }
 
 ?>
