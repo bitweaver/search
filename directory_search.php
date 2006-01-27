@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.3 2005/08/01 18:41:20 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.4 2006/01/27 21:56:30 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: directory_search.php,v 1.3 2005/08/01 18:41:20 squareing Exp $
+ * $Id: directory_search.php,v 1.4 2006/01/27 21:56:30 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -21,19 +21,8 @@ require_once( '../bit_setup_inc.php' );
 
 include_once( DIRECTORY_PKG_PATH.'dir_lib.php' );
 
-if ($feature_directory != 'y') {
-	$gBitSmarty->assign('msg', tra("This feature is disabled").": feature_directory");
-
-	$gBitSystem->display( 'error.tpl' );
-	die;
-}
-
-if (!$gBitUser->hasPermission( 'bit_p_view_directory' )) {
-	$gBitSmarty->assign('msg', tra("Permission denied"));
-
-	$gBitSystem->display( 'error.tpl' );
-	die;
-}
+$gBitSystem->verifyFeature( 'feature_directory' );
+$gBitSystem->verifyPermission( 'bit_p_view_directory' );
 
 $gBitSmarty->assign('words', $_REQUEST['words']);
 $gBitSmarty->assign('where', $_REQUEST['where']);
