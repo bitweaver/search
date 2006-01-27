@@ -57,6 +57,7 @@ $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 $gBitInstaller->registerPreferences( SEARCH_PKG_NAME, array(
 	array(SEARCH_PKG_NAME, 'feature_search_fulltext','y'),
 	array(SEARCH_PKG_NAME, 'feature_search_stats','n'),
+	array(SEARCH_PKG_NAME, 'search_index_on_submit','n'),
 	array(SEARCH_PKG_NAME, 'search_refresh_rate','5'),
 	array(SEARCH_PKG_NAME, 'search_min_wordlength','3'),
 	array(SEARCH_PKG_NAME, 'search_max_syllwords','100'),
