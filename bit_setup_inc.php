@@ -9,8 +9,7 @@ if( $gBitSystem->isPackageActive( 'search' ) ) {
 	// **********  SEARCH  ************
 	// Register the search refresh function
 	// But only if the Index On Submit isn't set
-	$sset = $gBitSystem->getPreference('search_index_on_submit');
-	if( !$sset == 'y' ) {
+	if( ! $gBitSystem->isFeatureActive("search_index_on_submit") ) {
 		include_once( SEARCH_PKG_PATH.'refresh.php' );
 		register_shutdown_function("refresh_search_index");
 	}
