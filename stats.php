@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/stats.php,v 1.1.1.1.2.2 2005/07/26 15:50:26 drewslater Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/stats.php,v 1.1.1.1.2.3 2006/01/28 09:18:59 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: stats.php,v 1.1.1.1.2.2 2005/07/26 15:50:26 drewslater Exp $
+ * $Id: stats.php,v 1.1.1.1.2.3 2006/01/28 09:18:59 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -21,22 +21,10 @@ require_once( '../bit_setup_inc.php' );
 
 include_once( SEARCH_PKG_PATH.'searchstats_lib.php');
 
-if ($feature_search_stats != 'y') {
-	$gBitSmarty->assign('msg', tra("This feature is disabled").": feature_search_stats");
-
-	$gBitSystem->display( 'error.tpl' );
-	die;
-}
-
-if (!$gBitUser->isAdmin()) {
-	$gBitSmarty->assign('msg', tra("You dont have permission to use this feature"));
-
-	$gBitSystem->display( 'error.tpl' );
-	die;
-}
+$gBitSystem->verifyFeature( 'feature_search_stats' );
+$gBitSystem->verifyPermission( 'bit_p_admin' );
 
 if (isset($_REQUEST["clear"])) {
-	
 	$searchstatslib->clear_search_stats();
 }
 
