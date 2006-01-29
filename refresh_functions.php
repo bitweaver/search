@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.11 2006/01/27 06:53:51 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.12 2006/01/29 05:16:17 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.11 2006/01/27 06:53:51 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.12 2006/01/29 05:16:17 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -172,6 +172,38 @@ function insert_index( &$words, $location, $pContentId ) {
 					(`location`,`content_id`,`searchword`,`count`,`last_update`) values (?,?,?,?,?)";
 				$gBitSystem->mDb->query($query, array($location, $pContentId, $key, (int) $value, $now));
 			}
+		}
+	}
+}
+
+function delete_search_words_and_syllables() {
+	global $gBitSystem;
+	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "tiki_searchwords`", array() );
+	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "tiki_searchsyllable`", array() );
+}
+
+function delete_index($pContentType) {
+	global $gBitSystem;
+	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "tiki_searchindex`";
+	$array = array();
+	if ( !($pContentType == "pages") ) {
+		$sql  .= " WHERE `location`=?";
+		$array = array($pContentType);
+	}
+	$gBitSystem->mDb->query( $sql, $array );
+
+}
+
+function rebuild_index($pContentType) {
+	global $gBitSystem;
+	delete_index($pContentType);
+	$query  = "SELECT `content_id` FROM `" . BIT_DB_PREFIX . "tiki_content`";
+	if ( !($pContentType == "pages")) $query .= " WHERE `content_type_guid` = '" . $pContentType . "'";
+	$result = $gBitSystem->mDb->query($query);
+	if( $result ) {
+		while ($res = $result->fetchRow()) {
+			$contentId = $res["content_id"];
+			refresh_index_tiki_content($contentId);
 		}
 	}
 }
