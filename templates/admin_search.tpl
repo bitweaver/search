@@ -42,6 +42,7 @@
 			<div class="row">
 				{formfeedback warning='Deleting the index will render search useless until content is reindexed.'}
 				{formfeedback warning='Rebuilding the Index <strong>could take a long time</strong> depending on how much content you have. If this is a large site, you may want to do this during off-peak hours.'}
+				{formfeedback warning='Note: timeout setting will automatically be set to 5 minutes for reindexing operations.'}
 			</div>
 			<div class="row">
 				{formlabel label="Perform action on:" for="where"}
