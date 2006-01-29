@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.13 2006/01/29 16:45:46 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.14 2006/01/29 17:51:57 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.13 2006/01/29 16:45:46 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.14 2006/01/29 17:51:57 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -137,7 +137,7 @@ function refresh_index_blogs( $pBlogID = 0 ) {
 
 function refresh_index_oldest(){
 	global $gBitSystem;
-	$contentID = $gBitSystem->mDb->getOne("SELECT content_id FROM `" . BIT_DB_PREFIX . 
+	$contentID = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
 				"tiki_searchindex` ORDER BY `last_update`", array());
 	if ( isset($contentID) ) {
 		refresh_index_tiki_content($contentID);
