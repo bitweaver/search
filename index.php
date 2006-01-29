@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.2 2005/10/30 10:09:03 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.3 2006/01/29 07:38:24 seannerd Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -8,7 +8,6 @@
 
 // Initialization
 require_once( '../bit_setup_inc.php' );
-
 require_once( SEARCH_PKG_PATH.'/search_lib.php');
 // note: lib/search/searchlib.php is new. the old one was lib/searchlib.php
 
@@ -16,10 +15,10 @@ $searchlib = &new SearchLib();
 
 $gBitSystem->verifyPackage( 'search' );
 
-foreach( $gLibertySystem->mContentTypes as $cType ) {
-	$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
-}
+$contentTypes 		 = array("bitarticle", "bitpage",    "bitblogpost", "bitcomment");
+$contentDescriptions = array("Articles",   "Wiki Pages", "Blog Posts",  "Comments");
 $gBitSmarty->assign( 'contentTypes', $contentTypes );
+$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
 
 if( !empty($_REQUEST["highlight"]) ) {
   $_REQUEST["words"]=$_REQUEST["highlight"];
@@ -29,19 +28,24 @@ if( !empty($_REQUEST["highlight"]) ) {
 	die;
 }
 
-if ($feature_search_stats == 'y') {
+if ($gBitSystem->isFeatureActive("feature_search_stats")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
-if (!isset($_REQUEST["where"])) {
-	$where = 'pages';
-} else {
+$where = 'pages';
+if (isset($_REQUEST["where"])) {
 	$where = $_REQUEST["where"];
 }
 
-$gBitSmarty->assign('where',$where);
-$gBitSmarty->assign('where2',tra($where));
+/*
+ * Seannerd poses question:
+ * Not sure why we are checking the permissions - I get why you want to, 
+ * but we don't check when you have "entire site" selected - so why does
+ * it matter about the individual pages? Security needs to be fixed 
+ * on the entire site search too. Commenting out his section for now.
+ */
 
+/*
 if($where=='wikis') {
 	$gBitSystem->verifyPackage( 'wiki' );
 	$gBitSystem->verifyPermission( 'bit_p_view' );
@@ -86,11 +90,10 @@ if(($where=='trackers')) {
 	$gBitSystem->verifyPackage( 'trackers' );
 	$gBitSystem->verifyPermission( 'bit_p_view_trackers' );
 }
+*/
 
-// Already assigned above! $gBitSmarty->assign('where',$where);
-if (!isset($_REQUEST["offset"])) {
-	$offset = 0;
-} else {
+$offset = 0;
+if (isset($_REQUEST["offset"])) {
 	$offset = $_REQUEST["offset"];
 }
 if (isset($_REQUEST['page'])) {
@@ -99,17 +102,15 @@ if (isset($_REQUEST['page'])) {
 }
 $gBitSmarty->assign_by_ref('offset', $offset);
 
-$fulltext = $feature_search_fulltext == 'y';
+$fulltext = $gBitSystem->isFeatureActive("feature_search_fulltext");
 
 // Build the query using words
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
 	$results = $searchlib->find($where,' ', $offset, $maxRecords, $fulltext);
-
 	$gBitSmarty->assign('words', '');
 } else {
-	$words = strip_tags($_REQUEST["words"]);
+	$words   = strip_tags($_REQUEST["words"]);
 	$results = $searchlib->find($where,$words, $offset, $maxRecords, $fulltext);
-
 	$gBitSmarty->assign('words', $words);
 }
 
@@ -124,9 +125,11 @@ if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
 //	$results['data'] = $CurrentData;
 //	$results['cant'] = $CurrentIndex + 1;
 //}
-$stubContent = new LibertyContent();
 
-if ( $results['cant'] > 0 ) {
+$stubContent = new LibertyContent();
+$cant        = $results['cant']; 
+
+if ( $cant > 0 ) {
 	foreach( array_keys( $results['data'] ) as $k ) {
 		if( !empty( $results['data'][$k]['data'] ) ) {
 			$results['data'][$k]['parsed'] = $stubContent->parseData( $results['data'][$k]['data'], $results['data'][$k]['format_guid'] );
@@ -134,12 +137,23 @@ if ( $results['cant'] > 0 ) {
 	}
 }
 
-$cant_pages = ceil($results["cant"] / $maxRecords);
-$gBitSmarty->assign('cant_results', $results["cant"]);
-$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
+$cant_pages = ceil($cant / $maxRecords);
+$gBitSmarty->assign('cant_results', $cant);
 $gBitSmarty->assign('actual_page', 1 + ($offset / $maxRecords));
+$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
 
-if ($results["cant"] > ($offset + $maxRecords)) {
+switch ($where) {
+	case "bitarticle"  : $where2 = "Article";	break;
+	case "bitpage"     : $where2 = "Wiki Page";	break;
+	case "bitblogpost" : $where2 = "Blog Post";	break;
+	case "bitcommant"  : $where2 = "Comment";	break;
+	default            : $where2 = "Page";		break;
+}
+if ($cant <> 1) $where2 .= "s"; 
+$gBitSmarty->assign('where', $where);
+$gBitSmarty->assign('where2', tra($where2));
+
+if ($cant > ($offset + $maxRecords)) {
 	$gBitSmarty->assign('next_offset', $offset + $maxRecords);
 } else {
 	$gBitSmarty->assign('next_offset', -1);
