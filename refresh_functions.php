@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.12 2006/01/29 05:16:17 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.13 2006/01/29 16:45:46 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.12 2006/01/29 05:16:17 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.13 2006/01/29 16:45:46 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -196,6 +196,7 @@ function delete_index($pContentType) {
 
 function rebuild_index($pContentType) {
 	global $gBitSystem;
+	ini_set("max_execution_time", "300");
 	delete_index($pContentType);
 	$query  = "SELECT `content_id` FROM `" . BIT_DB_PREFIX . "tiki_content`";
 	if ( !($pContentType == "pages")) $query .= " WHERE `content_type_guid` = '" . $pContentType . "'";
