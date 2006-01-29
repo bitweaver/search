@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.9 2006/01/27 07:06:28 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.10 2006/01/29 07:36:44 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.9 2006/01/27 07:06:28 seannerd Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.10 2006/01/29 07:36:44 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -48,7 +48,7 @@ class SearchLib extends BitBase {
 
 	function find($where,$words,$offset, $maxRecords) {
 		$words = strtolower($words);
-		$exact=$this->find_exact($where,$words,$offset, $maxRecords);
+		$exact=$this->find_exact($where, $words, $offset, $maxRecords);
 		$part=$this->find_part($where,$words,$offset, $maxRecords);
 		if ( $exact["cant"] > 0 )
 		{	foreach ($part["data"] as $p) {
@@ -257,25 +257,21 @@ class SearchLib extends BitBase {
 		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
 		if (count($words)>0) {
 			switch($where) {
-			case "bitcomment":
-			  return $this->find_exact_bitcomment($words,$offset, $maxRecords);
-			  break;
-			case "wikis":
-			  return $this->find_exact_wiki($words,$offset, $maxRecords);
-			  break;
-			case "articles":
-			  return $this->find_exact_articles($words,$offset, $maxRecords);
-			  break;
-			case "blogs":
-			  return $this->find_exact_blogs($words,$offset, $maxRecords);
-			  break;
-			case "posts":
-			  return $this->find_exact_blog_posts($words,$offset, $maxRecords);
-			  break;
-
-			default:
-			  return $this->find_exact_all($words,$offset, $maxRecords);
-			  break;
+				case "bitcomment":
+				  return $this->find_exact_bitcomment($words,$offset, $maxRecords);
+				  break;
+				case "bitpage":
+				  return $this->find_exact_wiki($words,$offset, $maxRecords);
+				  break;
+				case "bitarticle":
+				  return $this->find_exact_articles($words,$offset, $maxRecords);
+				  break;
+				case "bitblogpost":
+				  return $this->find_exact_blog_posts($words,$offset, $maxRecords);
+				  break;
+				default:
+				  return $this->find_exact_all($words,$offset, $maxRecords);
+				  break;
 			}
 		}
 	}

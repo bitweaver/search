@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.1.1.1.2.2 2005/07/26 15:50:27 drewslater Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.1.1.1.2.3 2006/01/29 07:33:38 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_package_search.php,v 1.1.1.1.2.2 2005/07/26 15:50:27 drewslater Exp $
+ * $Id: mod_package_search.php,v 1.1.1.1.2.3 2006/01/29 07:33:38 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
@@ -24,6 +24,11 @@
 		$searchTemplateRsrc = 'bitpackage:search/global_mini_search.tpl';
 		$searchTitle = '';
 	}
+	$contentTypes 		 = array("bitarticle", "bitpage",    "bitblogpost", "bitcomment");
+	$contentDescriptions = array("Articles",   "Wiki Pages", "Blog Posts",  "Comments");
+	$gBitSmarty->assign( 'contentTypes', $contentTypes );
+	$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
+
 	$gBitSmarty->assign( 'searchTitle', $searchTitle );
 	$gBitSmarty->assign( 'miniSearchRsrc', $searchTemplateRsrc );
 ?>
