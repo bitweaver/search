@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.6 2006/01/27 06:54:17 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.1.1.1.2.7 2006/01/29 18:52:36 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.1.1.1.2.6 2006/01/27 06:54:17 seannerd Exp $
+ * $Id: refresh.php,v 1.1.1.1.2.7 2006/01/29 18:52:36 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -38,21 +38,20 @@ function refresh_search_index() {
 			random_refresh_index("wiki");
 		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$locs[]="random_refresh_index('articles')";
+			$locs[''] = ARTICLES_PKG_NAME;
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 			//Can't use the new random function with blogs - they aren'tin tiki_content yet.
-			$locs[]="random_refresh_index_blogs";
+			$locs['random_refresh_index_blogs'] = '';
 			//Can use new function for blog_posts though ...
-			$locs[]="random_refresh_index('blog_posts')";
+			$locs['random_refresh_index']="blog_posts";
 		}
 
 		// comments can be everywhere?
-		$locs[]="random_refresh_index('comments')";
+		$locs['random_refresh_index'] = "comments";
 		// some refreshes to enhance the refreshing stats
-		$locs[]="refresh_index_oldest";
-		//print_r($locs);
-		$location = $locs[rand(0, count($locs) - 1)];
+		$locs['refresh_index_oldest'] = "";
+		$key = array_rand( $locs );
 		// random refresh
 
 		// hack around php database driver issues when a different database from bitweaver is accessed elsewhere during page  render
@@ -61,8 +60,9 @@ function refresh_search_index() {
 		global $gBitSystem, $gBitDbName;
 		$gBitSystem->mDb->mDb->SelectDB( $gBitDbName );
 
-		//echo "$location";
-		call_user_func ($location);
+		//vd($locs);
+		//vd($key);
+		call_user_func( $key, $locs[$key] );
 	}
 }
 
