@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.8 2006/01/26 14:57:33 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.9 2006/01/31 20:19:57 bitweaver Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.8 2006/01/26 14:57:33 squareing Exp $
+ * $Id: search_lib.php,v 1.9 2006/01/31 20:19:57 bitweaver Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -311,13 +311,13 @@ class SearchLib extends BitBase {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' ); // Make sure the CONTENT_TYPE_GUID is defined
 		$query="select s.`content_id` || s.`location` AS `results_key`, s.`location`, s.`last_update`, s.`count`,
 			b.`description`,b.`hits`,b.`last_modified`,b.`title`, b.`blog_id`
-			FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON ( b.`blog_id`=s.`content_id` )
+			FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."blogs` b ON ( b.`blog_id`=s.`content_id` )
 			WHERE lower(`searchword`) in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."'
 			ORDER BY `hits` desc";
 		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
-		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON ( b.`blog_id`=s.`content_id` ) WHERE `searchword` in
+		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."blogs` b ON ( b.`blog_id`=s.`content_id` ) WHERE `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."' and s.`content_id`=b.`blog_id`";
 		$cant=$this->mDb->getOne($querycant,$words);
@@ -338,8 +338,8 @@ class SearchLib extends BitBase {
 			$query="SELECT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`, tc.`data`,tc.`hits`,b.`title` as `btitle`, tc.`created`,tc.`title`, tc.`format_guid`, tc.`format_guid`,b.`blog_id`,bp.`post_id`
 					FROM `".BIT_DB_PREFIX."tiki_searchindex` s
 						INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` )
-						INNER JOIN `".BIT_DB_PREFIX."tiki_blog_posts` bp ON  ( tc.`content_id`=bp.`content_id` )
-						INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON( bp.`blog_id`=b.`blog_id` )
+						INNER JOIN `".BIT_DB_PREFIX."blog_posts` bp ON  ( tc.`content_id`=bp.`content_id` )
+						INNER JOIN `".BIT_DB_PREFIX."blogs` b ON( bp.`blog_id`=b.`blog_id` )
 					WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'
 					ORDER BY `hits` desc";
 			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
@@ -367,12 +367,12 @@ class SearchLib extends BitBase {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' ); // Make sure the CONTENT_TYPE_GUID is defined
 	    $query="select s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
 	    	a.`description`,tc.`hits`,a.`publish_date` from
-		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where lower(`searchword`) in
+		`".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."articles` a where lower(`searchword`) in
 		(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
 		".$this->mDb->sql_cast("tc.`title`","int")."=a.`article_id` ORDER BY tc.`hits` desc";
 	    $result=$this->mDb->query($query,$words,$maxRecords,$offset);
-            $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_articles` a where `searchword` in
+            $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."articles` a where `searchword` in
 	     	(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
 		".$this->mDb->sql_cast("tc.`title`","int")."=a.`article_id`";
@@ -394,12 +394,12 @@ class SearchLib extends BitBase {
 		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
 			require_once( WIKI_PKG_PATH.'BitPage.php' ); // Make sure the CONTENT_TYPE_GUID is defined
 			$query="SELECT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, tc.`format_guid`, s.`location`, s.`last_update`, s.`count`, tc.`data`, tc.`hits`, tc.`last_modified`, p.`page_id`
-			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."tiki_pages` p ON ( tc.`content_id`=p.`content_id` )
+			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."wiki_pages` p ON ( tc.`content_id`=p.`content_id` )
 			  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."'
 			  ORDER BY `count` desc";
 			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
 
-			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_pages` p
+			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."wiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."' and tc.`content_id`=p.`content_id`";
 			$cant=$this->mDb->getOne($querycant,$words);
 
@@ -426,7 +426,7 @@ class SearchLib extends BitBase {
 			  ORDER BY `count` desc";
 			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
 
-			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."tiki_pages` p
+			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON ( tc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."wiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITCOMMENT_CONTENT_TYPE_GUID."' and tc.`content_id`=p.`content_id`";
 			$cant=$this->mDb->getOne($querycant,$words);
 

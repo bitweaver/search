@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.10 2006/01/24 21:49:44 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.11 2006/01/31 20:19:57 bitweaver Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.10 2006/01/24 21:49:44 squareing Exp $
+ * $Id: refresh_functions.php,v 1.11 2006/01/31 20:19:57 bitweaver Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -38,9 +38,9 @@ function random_refresh_index_wiki(){
 		require_once( WIKI_PKG_PATH.'BitPage.php' );
 		//find random wiki page
 		global $wikilib;
-		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_pages`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."wiki_pages`",array());
 		if($cant>0) {
-			$query="select `content_id` from `".BIT_DB_PREFIX."tiki_pages`";
+			$query="select `content_id` from `".BIT_DB_PREFIX."wiki_pages`";
     		if( $conId=$gBitSystem->mDb->getOne($query,array(),1,rand(0,$cant-1)) ) {
 				refresh_index_wiki( $conId );
 			}
@@ -82,9 +82,9 @@ function random_refresh_index_blogs() {
 	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
 		// get random blog
-		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blogs`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."blogs`",array());
 		if($cant>0) {
-			$query="select tb.*, uu.`login` as `user`, uu.`real_name` from `".BIT_DB_PREFIX."tiki_blogs` tb, `".BIT_DB_PREFIX."users_users` uu WHERE uu.`user_id` = tb.`user_id`";
+			$query="select b.*, uu.`login` as `user`, uu.`real_name` from `".BIT_DB_PREFIX."blogs` b, `".BIT_DB_PREFIX."users_users` uu WHERE uu.`user_id` = b.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["user"]." ".$res["description"]);
@@ -98,11 +98,11 @@ function random_refresh_index_blog_posts() {
 	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlogPost.php' );
 		// get random blog
-		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blog_posts`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."blog_posts`",array());
 		if($cant>0) {
-			$query="SELECT tbp.*, tc.*, uu.`login` as `user`, uu.`real_name`
-					FROM `".BIT_DB_PREFIX."tiki_blog_posts` tbp, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
-					WHERE tbp.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
+			$query="SELECT bp.*, tc.*, uu.`login` as `user`, uu.`real_name`
+					FROM `".BIT_DB_PREFIX."blog_posts` bp, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
+					WHERE bp.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["user"]." ".$res["data"]);
@@ -116,11 +116,11 @@ function random_refresh_index_articles() {
 	if( $gBitSystem->isPackageActive( 'articles' ) ) {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' );
 		// get random article
-		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_articles`",array());
+		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."articles`",array());
 		if($cant>0 && !empty($res)) {
-			$query="SELECT ta.*, tc.*, uu.`login` as `user`, uu.`real_name`
-					FROM `".BIT_DB_PREFIX."tiki_articles` ta, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
-					WHERE ta.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
+			$query="SELECT a.*, tc.*, uu.`login` as `user`, uu.`real_name`
+					FROM `".BIT_DB_PREFIX."articles` a, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
+					WHERE a.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["data"]." ".$res["author"]);
