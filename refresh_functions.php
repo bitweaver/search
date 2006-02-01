@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.11 2006/01/31 20:19:57 bitweaver Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.12 2006/02/01 18:43:04 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.11 2006/01/31 20:19:57 bitweaver Exp $
+ * $Id: refresh_functions.php,v 1.12 2006/02/01 18:43:04 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -21,10 +21,10 @@ function random_refresh_index_comments() {
 	//find random forum comment
 	global $gBitSystem;
 	// get random comment
-	$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_comments`",array());
+	$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."liberty_comments`",array());
 	if($cant>0) {
 		require_once( LIBERTY_PKG_PATH.'LibertyComment.php' );
-		$query="select tcm.*,tc.`title`,tc.`data` from `".BIT_DB_PREFIX."tiki_comments` tcm INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON(tcm.`content_id`=tc.`content_id` )";
+		$query="select lcom.*,lc.`title`,lc.`data` from `".BIT_DB_PREFIX."liberty_comments` lcom INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON(lcom.`content_id`=lc.`content_id` )";
 		$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 		$res=$result->fetchRow();
 		$words=search_index($res["title"]." ".$res["data"]);
@@ -100,9 +100,9 @@ function random_refresh_index_blog_posts() {
 		// get random blog
 		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."blog_posts`",array());
 		if($cant>0) {
-			$query="SELECT bp.*, tc.*, uu.`login` as `user`, uu.`real_name`
-					FROM `".BIT_DB_PREFIX."blog_posts` bp, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
-					WHERE bp.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
+			$query="SELECT bp.*, lc.*, uu.`login` as `user`, uu.`real_name`
+					FROM `".BIT_DB_PREFIX."blog_posts` bp, `".BIT_DB_PREFIX."liberty_content` lc, `".BIT_DB_PREFIX."users_users` uu
+					WHERE bp.`content_id`=lc.`content_id` AND uu.`user_id` = lc.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["user"]." ".$res["data"]);
@@ -118,9 +118,9 @@ function random_refresh_index_articles() {
 		// get random article
 		$cant=$gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."articles`",array());
 		if($cant>0 && !empty($res)) {
-			$query="SELECT a.*, tc.*, uu.`login` as `user`, uu.`real_name`
-					FROM `".BIT_DB_PREFIX."articles` a, `".BIT_DB_PREFIX."tiki_content` tc, `".BIT_DB_PREFIX."users_users` uu
-					WHERE a.`content_id`=tc.`content_id` AND uu.`user_id` = tc.`user_id`";
+			$query="SELECT a.*, lc.*, uu.`login` as `user`, uu.`real_name`
+					FROM `".BIT_DB_PREFIX."articles` a, `".BIT_DB_PREFIX."liberty_content` lc, `".BIT_DB_PREFIX."users_users` uu
+					WHERE a.`content_id`=lc.`content_id` AND uu.`user_id` = lc.`user_id`";
 			$result=$gBitSystem->mDb->query($query,array(),1,rand(0,$cant-1));
 			$res=$result->fetchRow();
 			$words=search_index($res["title"]." ".$res["author_name"]." ".$res["heading"]." ".$res["data"]." ".$res["author"]);
