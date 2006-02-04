@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.4 2006/01/27 21:56:30 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/directory_search.php,v 1.5 2006/02/04 19:04:34 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: directory_search.php,v 1.4 2006/01/27 21:56:30 squareing Exp $
+ * $Id: directory_search.php,v 1.5 2006/02/04 19:04:34 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -76,8 +76,6 @@ if ($offset > 0) {
 }
 
 $gBitSmarty->assign_by_ref('items', $items["data"]);
-
-$section = 'directory';
 
 // Display the template
 $gBitSystem->display( 'bitpackage:search/directory_search.tpl');
