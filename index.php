@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.7 2006/02/06 00:10:42 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.8 2006/02/06 22:56:48 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -29,7 +29,7 @@ if( !empty($_REQUEST["highlight"]) ) {
 	die;
 }
 
-if ($gBitSystem->isFeatureActive( 'feature_search_stats' )) {
+if ($gBitSystem->isFeatureActive( 'search_stats' )) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
@@ -101,12 +101,12 @@ $gBitSmarty->assign_by_ref('offset', $offset);
 
 // Build the query using words
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
-	$results = $searchlib->find($where,' ', $offset, $max_records, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
+	$results = $searchlib->find($where,' ', $offset, $max_records, $gBitSystem->isFeatureActive( 'search_fulltext' ));
 
 	$gBitSmarty->assign('words', '');
 } else {
 	$words = strip_tags($_REQUEST["words"]);
-	$results = $searchlib->find($where,$words, $offset, $max_records, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
+	$results = $searchlib->find($where,$words, $offset, $max_records, $gBitSystem->isFeatureActive( 'search_fulltext' ));
 
 	$gBitSmarty->assign('words', $words);
 }

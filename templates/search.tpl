@@ -37,7 +37,7 @@
 				{assign var=guid value=$results[search].location}
 				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title}</a>
 				<small> &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
-					{if $gBitSystem->isFeatureActive( 'feature_search_fulltext' )}
+					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}
 						&nbsp;&bull;&nbsp;
 						{if $results[search].relevance <= 0}
 							{tr}Simple search{/tr}

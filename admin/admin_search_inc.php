@@ -1,17 +1,17 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.3 2005/11/22 07:27:44 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.4 2006/02/06 22:56:48 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 $formSearchToggles = array(
-	'feature_search_fulltext' => array(
+	'search_fulltext' => array(
 		'label' => 'Fulltext Search',
 		'note' => 'Enable Fulltext Search of all content. This enables users to serach the content of wiki pages, articles, blogs and other similar content.',
 //		'page' => 'FullTextSearch',
 	),
-	'feature_search_stats' => array(
+	'search_stats' => array(
 		'label' => 'Search Statistics',
 		'note' => 'Record searches made and their frequency.',
 //		'page' => 'SearchStats',
