@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.6 2006/01/27 21:56:30 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.7 2006/02/06 00:10:42 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -95,18 +95,18 @@ if (!isset($_REQUEST["offset"])) {
 }
 if (isset($_REQUEST['page'])) {
 	$page = &$_REQUEST['page'];
-	$offset = ($page - 1) * $maxRecords;
+	$offset = ($page - 1) * $max_records;
 }
 $gBitSmarty->assign_by_ref('offset', $offset);
 
 // Build the query using words
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
-	$results = $searchlib->find($where,' ', $offset, $maxRecords, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
+	$results = $searchlib->find($where,' ', $offset, $max_records, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
 
 	$gBitSmarty->assign('words', '');
 } else {
 	$words = strip_tags($_REQUEST["words"]);
-	$results = $searchlib->find($where,$words, $offset, $maxRecords, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
+	$results = $searchlib->find($where,$words, $offset, $max_records, $gBitSystem->isFeatureActive( 'feature_search_fulltext' ));
 
 	$gBitSmarty->assign('words', $words);
 }
@@ -132,20 +132,20 @@ if ( $results['cant'] > 0 ) {
 	}
 }
 
-$cant_pages = ceil($results["cant"] / $maxRecords);
+$cant_pages = ceil($results["cant"] / $max_records);
 $gBitSmarty->assign('cant_results', $results["cant"]);
 $gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
-$gBitSmarty->assign('actual_page', 1 + ($offset / $maxRecords));
+$gBitSmarty->assign('actual_page', 1 + ($offset / $max_records));
 
-if ($results["cant"] > ($offset + $maxRecords)) {
-	$gBitSmarty->assign('next_offset', $offset + $maxRecords);
+if ($results["cant"] > ($offset + $max_records)) {
+	$gBitSmarty->assign('next_offset', $offset + $max_records);
 } else {
 	$gBitSmarty->assign('next_offset', -1);
 }
 
 // If offset is > 0 then prev_offset
 if ($offset > 0) {
-	$gBitSmarty->assign('prev_offset', $offset - $maxRecords);
+	$gBitSmarty->assign('prev_offset', $offset - $max_records);
 } else {
 	$gBitSmarty->assign('prev_offset', -1);
 }

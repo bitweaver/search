@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.10 2006/02/01 18:43:04 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.11 2006/02/06 00:10:42 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.10 2006/02/01 18:43:04 squareing Exp $
+ * $Id: search_lib.php,v 1.11 2006/02/06 00:10:42 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -44,10 +44,10 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function find($where,$words,$offset, $maxRecords) {
+	function find($where,$words,$offset, $max_records) {
 		$words = strtolower($words);
-		$exact=$this->find_exact($where,$words,$offset, $maxRecords);
-		$part=$this->find_part($where,$words,$offset, $maxRecords);
+		$exact=$this->find_exact($where,$words,$offset, $max_records);
+		$part=$this->find_part($where,$words,$offset, $max_records);
 		if ( $exact["cant"] > 0 )
 		{	foreach ($part["data"] as $p) {
 				$same = false;
@@ -71,28 +71,28 @@ class SearchLib extends BitBase {
 	}
 
 
-	function find_part($where,$words,$offset, $maxRecords) {
+	function find_part($where,$words,$offset, $max_records) {
 		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
 		if (count($words)>0) {
 			switch($where) {
 				case "bitcomment":
-				  return $this->find_part_bitcomment($words,$offset, $maxRecords);
+				  return $this->find_part_bitcomment($words,$offset, $max_records);
 				  break;
 				case "wikis":
-				  return $this->find_part_wiki($words,$offset, $maxRecords);
+				  return $this->find_part_wiki($words,$offset, $max_records);
 				  break;
 				case "articles":
-				  return $this->find_part_articles($words,$offset, $maxRecords);
+				  return $this->find_part_articles($words,$offset, $max_records);
 				  break;
 				case "blogs":
-				  return $this->find_part_blogs($words,$offset, $maxRecords);
+				  return $this->find_part_blogs($words,$offset, $max_records);
 				  break;
 				case "posts":
-				  return $this->find_part_blog_posts($words,$offset, $maxRecords);
+				  return $this->find_part_blog_posts($words,$offset, $max_records);
 				  break;
 
 				default:
-				  return $this->find_part_all($words,$offset, $maxRecords);
+				  return $this->find_part_all($words,$offset, $max_records);
 				  break;
 			}
 		}
@@ -187,27 +187,27 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function find_part_bitcomment($words,$offset, $maxRecords) {
-		return $this->find_exact_bitcomment($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
+	function find_part_bitcomment($words,$offset, $max_records) {
+		return $this->find_exact_bitcomment($this->get_wordlist_from_syllables($words),$offset, $max_records);
 	}
 
-	function find_part_wiki($words,$offset, $maxRecords) {
-		return $this->find_exact_wiki($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
+	function find_part_wiki($words,$offset, $max_records) {
+		return $this->find_exact_wiki($this->get_wordlist_from_syllables($words),$offset, $max_records);
 	}
 
-	function find_part_articles($words,$offset, $maxRecords) {
-		return $this->find_exact_articles($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
+	function find_part_articles($words,$offset, $max_records) {
+		return $this->find_exact_articles($this->get_wordlist_from_syllables($words),$offset, $max_records);
 	}
 
-	function find_part_blogs($words,$offset, $maxRecords) {
-		return $this->find_exact_blogs($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
+	function find_part_blogs($words,$offset, $max_records) {
+		return $this->find_exact_blogs($this->get_wordlist_from_syllables($words),$offset, $max_records);
 	}
 
-	function find_part_blog_posts($words,$offset, $maxRecords) {
-		return $this->find_exact_blog_posts($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
+	function find_part_blog_posts($words,$offset, $max_records) {
+		return $this->find_exact_blog_posts($this->get_wordlist_from_syllables($words),$offset, $max_records);
 	}
 
-	function find_part_all($words,$offset, $maxRecords) {
+	function find_part_all($words,$offset, $max_records) {
 		global $gBitSystem;
 		$commentresults["data"] = array( );
 		$wikiresults["data"] = array();
@@ -216,24 +216,24 @@ class SearchLib extends BitBase {
 		$blogpostsresults["data"] = array();
 		$cant = 0;
 		if( $gBitSystem->isPackageActive( 'bitcomment' ) ) {
-			$commentresults=$this->find_part_bitcomment($words,$offset, $maxRecords);
+			$commentresults=$this->find_part_bitcomment($words,$offset, $max_records);
 			$cant += $commentresults["cant"];
 		} 
 		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
-			$wikiresults=$this->find_part_wiki($words,$offset, $maxRecords);
+			$wikiresults=$this->find_part_wiki($words,$offset, $max_records);
 			$cant += $wikiresults["cant"];
 		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$artresults=$this->find_part_articles($words,$offset, $maxRecords);
+			$artresults=$this->find_part_articles($words,$offset, $max_records);
 			$cant += $artresults["cant"];
 		}
 		if( $gBitSystem->isPackageActive( 'bitforums' ) ) {
-			$forumresults=$this->find_part_forums($words,$offset, $maxRecords);
+			$forumresults=$this->find_part_forums($words,$offset, $max_records);
 			$cant += $forumresults["cant"];
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-			$blogresults=$this->find_part_blogs($words,$offset, $maxRecords);
-			$blogpostsresults=$this->find_part_blog_posts($words,$offset, $maxRecords);
+			$blogresults=$this->find_part_blogs($words,$offset, $max_records);
+			$blogpostsresults=$this->find_part_blog_posts($words,$offset, $max_records);
 			$cant += $blogresults["cant"] + $blogpostsresults["cant"];
 		}
 
@@ -247,49 +247,49 @@ class SearchLib extends BitBase {
 		return ($res);
 	}
 
-	function find_exact($where,$words,$offset, $maxRecords) {
+	function find_exact($where,$words,$offset, $max_records) {
 		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
 		if (count($words)>0) {
 			switch($where) {
 			case "bitcomment":
-			  return $this->find_exact_bitcomment($words,$offset, $maxRecords);
+			  return $this->find_exact_bitcomment($words,$offset, $max_records);
 			  break;
 			case "wikis":
-			  return $this->find_exact_wiki($words,$offset, $maxRecords);
+			  return $this->find_exact_wiki($words,$offset, $max_records);
 			  break;
 			case "articles":
-			  return $this->find_exact_articles($words,$offset, $maxRecords);
+			  return $this->find_exact_articles($words,$offset, $max_records);
 			  break;
 			case "blogs":
-			  return $this->find_exact_blogs($words,$offset, $maxRecords);
+			  return $this->find_exact_blogs($words,$offset, $max_records);
 			  break;
 			case "posts":
-			  return $this->find_exact_blog_posts($words,$offset, $maxRecords);
+			  return $this->find_exact_blog_posts($words,$offset, $max_records);
 			  break;
 
 			default:
-			  return $this->find_exact_all($words,$offset, $maxRecords);
+			  return $this->find_exact_all($words,$offset, $max_records);
 			  break;
 			}
 		}
 	}
 
-	function find_exact_all($words,$offset, $maxRecords) {
+	function find_exact_all($words,$offset, $max_records) {
 		global $gBitSystem;
-		$commentresults=$this->find_exact_bitcomment($words,$offset, $maxRecords);
+		$commentresults=$this->find_exact_bitcomment($words,$offset, $max_records);
 		$wikiresults["data"] = array();
 		$artresults["data"] = array();
 		$blogresults["data"] = array();
 		$blogpostsresults["data"] = array();
 		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
-			$wikiresults=$this->find_exact_wiki($words,$offset, $maxRecords);
+			$wikiresults=$this->find_exact_wiki($words,$offset, $max_records);
 		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$artresults=$this->find_exact_articles($words,$offset, $maxRecords);
+			$artresults=$this->find_exact_articles($words,$offset, $max_records);
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-			$blogresults=$this->find_exact_blogs($words,$offset, $maxRecords);
-			$blogpostsresults=$this->find_exact_blog_posts($words,$offset, $maxRecords);
+			$blogresults=$this->find_exact_blogs($words,$offset, $max_records);
+			$blogpostsresults=$this->find_exact_blog_posts($words,$offset, $max_records);
 		}
 
 		//merge the results, use @ to silence the warnings
@@ -304,7 +304,7 @@ class SearchLib extends BitBase {
 		return ($res);
 	}
 
-	function find_exact_blogs($words,$offset, $maxRecords) {
+	function find_exact_blogs($words,$offset, $max_records) {
 	  global $gBitSystem;
 	  $ret =  array('data' => array(),'cant' => 0);
 	  if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
@@ -316,7 +316,7 @@ class SearchLib extends BitBase {
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."'
 			ORDER BY `hits` desc";
-		$result=$this->mDb->query($query,$words,$maxRecords,$offset);
+		$result=$this->mDb->query($query,$words,$max_records,$offset);
 		$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."blogs` b ON ( b.`blog_id`=s.`content_id` ) WHERE `searchword` in
 			(".implode(',',array_fill(0,count($words),'?')).") and
 			s.`location`='".BITBLOG_CONTENT_TYPE_GUID."' and s.`content_id`=b.`blog_id`";
@@ -331,7 +331,7 @@ class SearchLib extends BitBase {
 	  return $ret;
 	}
 
-	function find_exact_blog_posts($words,$offset, $maxRecords) {
+	function find_exact_blog_posts($words,$offset, $max_records) {
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
 			require_once( BLOGS_PKG_PATH.'BitBlogPost.php' ); // Make sure the CONTENT_TYPE_GUID is defined
@@ -342,7 +342,7 @@ class SearchLib extends BitBase {
 						INNER JOIN `".BIT_DB_PREFIX."blogs` b ON( bp.`blog_id`=b.`blog_id` )
 					WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'
 					ORDER BY `hits` desc";
-			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
+			$result=$this->mDb->query($query,$words,$max_records,$offset);
 			$querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s where `searchword` in
 				(".implode(',',array_fill(0,count($words),'?')).") and
 				s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'";
@@ -361,7 +361,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function find_exact_articles($words,$offset, $maxRecords) {
+	function find_exact_articles($words,$offset, $max_records) {
       global $gBitSystem;
 	  if ($gBitSystem->isPackageActive( 'articles' )  && count($words) >0) {
 		require_once( ARTICLES_PKG_PATH.'BitArticle.php' ); // Make sure the CONTENT_TYPE_GUID is defined
@@ -371,7 +371,7 @@ class SearchLib extends BitBase {
 		(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
 		".$this->mDb->sql_cast("lc.`title`","int")."=a.`article_id` ORDER BY lc.`hits` desc";
-	    $result=$this->mDb->query($query,$words,$maxRecords,$offset);
+	    $result=$this->mDb->query($query,$words,$max_records,$offset);
             $querycant="select count(*) from `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( lc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."articles` a where `searchword` in
 	     	(".implode(',',array_fill(0,count($words),'?')).") and
 		s.`location`='".BITARTICLE_CONTENT_TYPE_GUID."' and
@@ -388,7 +388,7 @@ class SearchLib extends BitBase {
 	  }
 	}
 
-	function find_exact_wiki($words,$offset, $maxRecords) {
+	function find_exact_wiki($words,$offset, $max_records) {
 		global $gPage;
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
@@ -397,7 +397,7 @@ class SearchLib extends BitBase {
 			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( lc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."wiki_pages` p ON ( lc.`content_id`=p.`content_id` )
 			  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."'
 			  ORDER BY `count` desc";
-			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
+			$result=$this->mDb->query($query,$words,$max_records,$offset);
 
 			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( lc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."wiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITPAGE_CONTENT_TYPE_GUID."' and lc.`content_id`=p.`content_id`";
@@ -415,7 +415,7 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function find_exact_bitcomment($words,$offset, $maxRecords) {
+	function find_exact_bitcomment($words,$offset, $max_records) {
 		global $gPage;
 		global $gBitSystem;
 		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
@@ -424,7 +424,7 @@ class SearchLib extends BitBase {
 			  FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( lc.`content_id`=s.`content_id` ) INNER JOIN `".BIT_DB_PREFIX."liberty_comments` tcc ON ( lc.`content_id`=tcc.`content_id` )
 			  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITCOMMENT_CONTENT_TYPE_GUID."'
 			  ORDER BY `count` desc";
-			$result=$this->mDb->query($query,$words,$maxRecords,$offset);
+			$result=$this->mDb->query($query,$words,$max_records,$offset);
 
 			$querycant="SELECT count(*) FROM `".BIT_DB_PREFIX."tiki_searchindex` s INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON ( lc.`content_id`=s.`content_id` ), `".BIT_DB_PREFIX."wiki_pages` p
 				  WHERE lower(`searchword`) in (".implode(',',array_fill(0,count($words),'?')).") and s.`location`='".BITCOMMENT_CONTENT_TYPE_GUID."' and lc.`content_id`=p.`content_id`";
