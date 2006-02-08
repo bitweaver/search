@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.13 2006/02/08 08:24:20 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.14 2006/02/08 15:58:09 sylvieg Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.13 2006/02/08 08:24:20 lsces Exp $
+ * $Id: refresh_functions.php,v 1.14 2006/02/08 15:58:09 sylvieg Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -131,7 +131,7 @@ function refresh_index_blogs( $pBlogId = 0 ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
 		$query = "SELECT b.`title`, b.`description`, uu.`login` as `user`, uu.`real_name`
 					FROM `".BIT_DB_PREFIX."blogs` b
-					INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = tb.`user_id`
+					INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = b.`user_id`
 					WHERE `blog_id` = " . $pBlogId;
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
