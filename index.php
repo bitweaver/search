@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.5 2006/02/08 04:26:35 mej Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.6 2006/02/08 05:20:21 mej Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -84,7 +84,7 @@ $gBitSmarty->assign('where2', tra($where2));
 $stubContent = new LibertyContent();
 if ( $cant > 0 ) {
 	foreach( array_keys( $results['data'] ) as $k ) {
-		if( !empty( $results['data'][$k]['title'] ) ) {
+		if( empty( $results['data'][$k]['title'] ) ) {
 			$date_format = $gBitSystem->get_long_date_format();
 			if( $gBitSystem->mServerTimestamp->get_display_offset() ) {
 				$date_format = preg_replace( "/ ?%Z/", "", $date_format );
