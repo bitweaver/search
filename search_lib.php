@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.10 2006/01/29 07:36:44 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.11 2006/02/08 03:16:12 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,17 +8,16 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.10 2006/01/29 07:36:44 seannerd Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.11 2006/02/08 03:16:12 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
 
-// to do - make searches cache.
- 
 /**
  * @package search
  * @subpackage SearchLib
  */
+
 class SearchLib extends BitBase {
 	function SearchLib() {
 		BitBase::BitBase();
@@ -28,128 +27,57 @@ class SearchLib extends BitBase {
 	function register_search($words) {
 		$words = strtolower($words);
 		$words = addslashes($words);
-
 		$words = preg_split("/\s/", $words);
-
 		foreach ($words as $word) {
 			$word = trim($word);
-
-			$cant = $this->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_search_stats` where `term`=?",array($word));
-
+			$cant = $this->mDb->getOne("select count(*) from `" . BIT_DB_PREFIX . 
+				"tiki_search_stats` where `term`=?", array($word));
 			if ($cant) {
-				$query = "update `".BIT_DB_PREFIX."tiki_search_stats` set `hits`= `hits` + 1 where `term`=?";
+				$query = "update `" . BIT_DB_PREFIX . "tiki_search_stats` set `hits`= `hits` + 1 where `term`=?";
 			} else {
-				$query = "insert into `".BIT_DB_PREFIX."tiki_search_stats` (`term`,`hits`) values (?,1)";
+				$query = "insert into `" . BIT_DB_PREFIX . "tiki_search_stats` (`term`,`hits`) values (?,1)";
 			}
-
 			$result = $this->mDb->query($query,array($word));
 		}
 	}
 
-	function find($where,$words,$offset, $maxRecords) {
-		$words = strtolower($words);
-		$exact=$this->find_exact($where, $words, $offset, $maxRecords);
-		$part=$this->find_part($where,$words,$offset, $maxRecords);
-		if ( $exact["cant"] > 0 )
-		{	foreach ($part["data"] as $p) {
-				$same = false;
-				foreach ($exact["data"] as $e) {
-					if ($p["results_key"] == $e["results_key"]) {
-						$same = true;
-						break;
-					}
-				}
-				if (!$same) {
-					array_push($exact["data"], $p);
-					$exact["cant"]++;
-				}	
+	function find($where, $words, $offset, $maxRecords, $plUsePart = false) {
+		$words = preg_split("/[\W]+/", strtolower($words), -1, PREG_SPLIT_NO_EMPTY);
+		if ($plUsePart) {
+			$wordList = $this->get_wordlist_from_syllables($words);
+			if(array($wordList)) {
+				$words = array_merge($words, $wordList);
 			}
 		}
-		$res=$exact;
-//		$res=array();
-//		$res["data"]=array_merge($exact["data"],$part["data"]);
-//		$res["cant"]=$exact["cant"]+$part["cant"];
+//		$res = $this->find_exact($where, $words, $offset, $maxRecords);
+		$res = $this->find_exact_generic($where, $words, $offset, $maxRecords);
 		return $res;
 	}
 
-
-	function find_part($where,$words,$offset, $maxRecords) {
-		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
-		if (count($words)>0) {
-			switch($where) {
-				case "bitcomment":
-				  return $this->find_part_bitcomment($words,$offset, $maxRecords);
-				  break;
-				case "wikis":
-				  return $this->find_part_wiki($words,$offset, $maxRecords);
-				  break;
-				case "articles":
-				  return $this->find_part_articles($words,$offset, $maxRecords);
-				  break;
-				case "blogs":
-				  return $this->find_part_blogs($words,$offset, $maxRecords);
-				  break;
-				case "posts":
-				  return $this->find_part_blog_posts($words,$offset, $maxRecords);
-				  break;
-
-				default:
-				  return $this->find_part_all($words,$offset, $maxRecords);
-				  break;
+	/*
+	 * This function checks the tiki_searchsyllable table to see how old the "syllable" is
+	 * If the syllable is to old or doesn't exist, it refreshes the syllable/word list stored in tiki_searchwords
+	 * Then, it get a list of words from the tiki_searchwords table and returns an array of them
+	*/
+	function get_wordlist_from_syllables($syllables) {
+		global $search_syll_age;
+		$ret = array();
+		foreach($syllables as $syllable) {
+			$bindvars = array($syllable);
+			$age      = time() - $this->mDb->getOne(
+						"select `last_updated` from `" . BIT_DB_PREFIX . "tiki_searchsyllable` where `syllable`=?",
+						$bindvars);
+			if(!$age || $age > ($search_syll_age * 3600)) {// older than search_syll_age hours
+				$a = $this->refresh_lru_wordlist($syllable);
 			}
-		}
-	}
-
-	function refresh_lru_wordlist($syllable) {
-		global $search_max_syllwords;
-		global $search_lru_length;
-		global $search_lru_purge_rate;
-		// delete from wordlist and lru list
-		$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($syllable),-1,-1);
-		$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($syllable),-1,-1);
-		// search the searchindex - can take long time
-		$ret=array();
-		if (!isset($search_max_syllwords))
-			$search_max_syllwords = 100;
-		$query="select `searchword`, sum(`count`) as `cnt` from `".BIT_DB_PREFIX."tiki_searchindex`
-			where `searchword` like ? group by `searchword` ORDER BY 2 desc";
-		$result=$this->mDb->query($query,array('%'.$syllable.'%'),$search_max_syllwords); // search_max_syllwords: how many different searchwords that contain the syllable are taken into account?. Sortet by number of occurences.
-		while ($res = $result->fetchRow()) {
-			$ret[]=$res["searchword"];
-		}
-		// cache this long running query
-		foreach($ret as $searchword) {
-			$this->mDb->query("insert into `".BIT_DB_PREFIX."tiki_searchwords` (`syllable`,`searchword`) values (?,?)",array($syllable,$searchword),-1,-1);
+			$lruList = $this->get_lru_wordlist($syllable);
+			if (is_array($lruList)) {
+				$ret = array_merge($ret, $lruList);
 			}
-		// set lru list parameters
-		$now=time();
-		$this->mDb->query("insert into `".BIT_DB_PREFIX."tiki_searchsyllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
-			array($syllable,(int) $now,(int) $now));
-
-		// at random rate: check length of lru list and purge these that
-		// have not been used for long time. This is what a lru list
-		// basically does
-		list($usec, $sec) = explode(" ",microtime());
-		srand (ceil($sec+100*$usec));
-		if(rand(1,$search_lru_purge_rate)==1) {
-			$lrulength=$this->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_searchsyllable`",array());
-			if ($lrulength > $search_lru_length) { // only purge if lru list is long.
-				//purge oldest
-				$diff=$lrulength-$search_lru_length;
-				$oldwords=array();
-				$query="select `syllable` from `".BIT_DB_PREFIX."tiki_searchsyllable` ORDER BY `last_used` asc";
-				$result=$this->mDb->query($query,array(),$diff);
-				while ($res = $result->fetchRow()) {
-					//we probably cannot delete now. to avoid database deadlocks
-					//we save the words and delete later
-					$oldwords[]=$res["syllable"];
-				}
-				foreach($oldwords as $oldword) {
-					$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($oldword),-1,-1);
-					$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($oldword),-1,-1);
-				}
-
-			}
+			// update lru last used value (Used to purge oldest last used records)
+			$now = time();
+			$this->mDb->query("update `" . BIT_DB_PREFIX . "tiki_searchsyllable` set `last_used`=? where `syllable`=?",
+				array((int) $now, $syllable));
 		}
 		return $ret;
 	}
@@ -157,8 +85,8 @@ class SearchLib extends BitBase {
 	function get_lru_wordlist($syllable) {
 		$ret = array();
 		if(!isset($this->wordlist_cache[$syllable])) {
-        		$query="select `searchword` from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?";
-        		$result=$this->mDb->query($query,array($syllable));
+	       		$query  = "select `searchword` from `" . BIT_DB_PREFIX . "tiki_searchwords` where `syllable`=?";
+        		$result = $this->mDb->query($query, array($syllable));
         		if ($result->RecordCount() > 0) {
 	        		while ($res = $result->fetchRow()) {
     	    			$this->wordlist_cache[$syllable][]=$res["searchword"];
@@ -169,306 +97,113 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function get_wordlist_from_syllables($syllables) {
-		$ret=array();
-		global $search_syll_age;
-		foreach($syllables as $syllable) {
-			//Have a look at the lru list (tiki_searchsyllable)
-			$bindvars=array($syllable);
-			$age=time()-$this->mDb->getOne("select `last_updated` from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",$bindvars);
-			if(!$age || $age>($search_syll_age*3600)) {// older than search_syll_age hours
-				$a=$this->refresh_lru_wordlist($syllable);
-				$ret=array_merge($ret,$a);
-			} else {
+	function refresh_lru_wordlist($syllable) {
+		global $search_max_syllwords;
+		global $search_lru_length;
+		global $search_lru_purge_rate;
+		$ret = array();
 
-				// get wordlist
-				if (is_array($this->get_lru_wordlist($syllable)))
-				$ret=array_merge($ret,$this->get_lru_wordlist($syllable));
+		// delete from wordlist and lru list
+		$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchwords` where `syllable`=?",array($syllable),-1,-1);
+		$this->mDb->query("delete from `".BIT_DB_PREFIX."tiki_searchsyllable` where `syllable`=?",array($syllable),-1,-1);
+		if (!isset($search_max_syllwords)) {
+			$search_max_syllwords = 100;
+		}
+		$query  = "select `searchword`, sum(`count`) as `cnt` from `" . BIT_DB_PREFIX . 
+					"tiki_searchindex` where `searchword` like ? group by `searchword` ORDER BY 2 desc";
+		$result = $this->mDb->query($query, array('%' . $syllable . '%'), $search_max_syllwords); // search_max_syllwords: how many different searchwords that contain the syllable are taken into account?. Sortet by number of occurences.
+		while ($res = $result->fetchRow()) {
+			$ret[] = $res["searchword"];
+		}
+		// cache this long running query
+		foreach($ret as $searchword) {
+			$this->mDb->query("insert into `" . BIT_DB_PREFIX . 
+				"tiki_searchwords` (`syllable`,`searchword`) values (?,?)",
+				array($syllable, $searchword), -1, -1);
 			}
+		// set lru list parameters
+		$now = time();
+		$this->mDb->query("insert into `" . BIT_DB_PREFIX . 
+			"tiki_searchsyllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
+			array($syllable,(int) $now,(int) $now));
 
-			// update lru list status
-			$now=time();
-			$this->mDb->query("update `".BIT_DB_PREFIX."tiki_searchsyllable` set `last_used`=? where `syllable`=?",array((int) $now,$syllable));
+		// at random rate: check length of lru list and purge these that
+		// have not been used for long time. This is what a lru list
+		// basically does
+		list($usec, $sec) = explode(" ", microtime());
+		srand (ceil($sec + 100 * $usec));
+		if(rand(1, $search_lru_purge_rate) == 1) {
+			$lrulength = $this->mDb->getOne("select count(*) from `" . BIT_DB_PREFIX . 
+				"tiki_searchsyllable`", array());
+			if ($lrulength > $search_lru_length) { // only purge if lru list is too long.
+				//purge oldest
+				$oldwords = array();
+				$diff   = $lrulength - $search_lru_length;
+				$query  = "select `syllable` from `".BIT_DB_PREFIX."tiki_searchsyllable` ORDER BY `last_used` asc";
+				$result = $this->mDb->query($query, array(), $diff);
+				while ($res = $result->fetchRow()) {
+					$oldwords[]=$res["syllable"];
+				}
+				foreach($oldwords as $oldword) {
+					$this->mDb->query("delete from `" . BIT_DB_PREFIX . 
+						"tiki_searchwords`    where `syllable`=?", array($oldword), -1, -1);
+					$this->mDb->query("delete from `" . BIT_DB_PREFIX . 
+						"tiki_searchsyllable` where `syllable`=?", array($oldword), -1, -1);
+				}
+
+			}
 		}
 		return $ret;
 	}
 
-	function find_part_bitcomment($words,$offset, $maxRecords) {
-		return $this->find_exact_bitcomment($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function find_part_wiki($words,$offset, $maxRecords) {
-		return $this->find_exact_wiki($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function find_part_articles($words,$offset, $maxRecords) {
-		return $this->find_exact_articles($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function find_part_blogs($words,$offset, $maxRecords) {
-		return $this->find_exact_blogs($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function find_part_blog_posts($words,$offset, $maxRecords) {
-		return $this->find_exact_blog_posts($this->get_wordlist_from_syllables($words),$offset, $maxRecords);
-	}
-
-	function find_part_all($words,$offset, $maxRecords) {
-		global $gBitSystem;
-		$commentresults["data"] = array( );
-		$wikiresults["data"] = array();
-		$artresults["data"] = array();
-		$blogresults["data"] = array();
-		$blogpostsresults["data"] = array();
-		$cant = 0;
-		if( $gBitSystem->isPackageActive( 'bitcomment' ) ) {
-			$commentresults=$this->find_part_bitcomment($words,$offset, $maxRecords);
-			$cant += $commentresults["cant"];
-		} 
-		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
-			$wikiresults=$this->find_part_wiki($words,$offset, $maxRecords);
-			$cant += $wikiresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$artresults=$this->find_part_articles($words,$offset, $maxRecords);
-			$cant += $artresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'bitforums' ) ) {
-			$forumresults=$this->find_part_forums($words,$offset, $maxRecords);
-			$cant += $forumresults["cant"];
-		}
-		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-			$blogresults=$this->find_part_blogs($words,$offset, $maxRecords);
-			$blogpostsresults=$this->find_part_blog_posts($words,$offset, $maxRecords);
-			$cant += $blogresults["cant"] + $blogpostsresults["cant"];
-		}
-
-		//merge the results, use @ to silence the warnings
-		$res=array();
-		$res["data"] = @array_merge($commentresults["data"],$wikiresults["data"]
-			,$artresults["data"]
-			,$blogresults["data"],$blogpostsresults["data"]
-			);
-		$res["cant"] = $cant;
-		return ($res);
-	}
-
-	function find_exact($where,$words,$offset, $maxRecords) {
-		$words=preg_split("/[\W]+/",$words,-1,PREG_SPLIT_NO_EMPTY);
-		if (count($words)>0) {
-			switch($where) {
-				case "bitcomment":
-				  return $this->find_exact_bitcomment($words,$offset, $maxRecords);
-				  break;
-				case "bitpage":
-				  return $this->find_exact_wiki($words,$offset, $maxRecords);
-				  break;
-				case "bitarticle":
-				  return $this->find_exact_articles($words,$offset, $maxRecords);
-				  break;
-				case "bitblogpost":
-				  return $this->find_exact_blog_posts($words,$offset, $maxRecords);
-				  break;
-				default:
-				  return $this->find_exact_all($words,$offset, $maxRecords);
-				  break;
-			}
-		}
-	}
-
-	function find_exact_all($words,$offset, $maxRecords) {
-		global $gBitSystem;
-		$commentresults=$this->find_exact_bitcomment($words,$offset, $maxRecords);
-		$wikiresults["data"] = array();
-		$artresults["data"] = array();
-		$blogresults["data"] = array();
-		$blogpostsresults["data"] = array();
-		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
-			$wikiresults=$this->find_exact_wiki($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$artresults=$this->find_exact_articles($words,$offset, $maxRecords);
-		}
-		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-			$blogresults=$this->find_exact_blogs($words,$offset, $maxRecords);
-			$blogpostsresults=$this->find_exact_blog_posts($words,$offset, $maxRecords);
-		}
-
-		//merge the results, use @ to silence the warnings
-		$res=array();
-		$res["data"]=@array_merge($wikiresults["data"],
-			$commentresults["data"],$artresults["data"],
-			$blogresults["data"],$blogpostsresults["data"]
-			);
-		$res["cant"]=@($wikiresults["cant"]+$artresults["cant"]+
-			$blogresults["cant"]+$blogpostsresults["cant"]
-			);
-		return ($res);
-	}
-
-	function find_exact_blogs($words,$offset, $maxRecords) {
-	  global $gBitSystem;
-	  $ret =  array('data' => array(),'cant' => 0);
-	  if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
-		require_once( BLOGS_PKG_PATH.'BitBlog.php' ); // Make sure the CONTENT_TYPE_GUID is defined
-		$imploded = implode(',', array_fill(0, count($words), '?'));
-		$query = "SELECT DISTINCT s.`content_id` || s.`location` AS `results_key`, s.`location`, s.`last_update`,
-							s.`count`, b.`description`, b.`hits`, b.`last_modified`, b.`title`, b.`blog_id`
-					FROM `".BIT_DB_PREFIX."tiki_searchindex` s 
-							INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON b.`blog_id` = s.`content_id`
-					WHERE `searchword` IN (" . $imploded . ")
-							 AND s.`location` = '".BITBLOG_CONTENT_TYPE_GUID."'
-					ORDER BY `hits` desc";
-		$result    = $this->mDb->query($query, $words, $maxRecords, $offset);
-		$querycant = "SELECT COUNT(DISTINCT s.`content_id`) FROM `".BIT_DB_PREFIX."tiki_searchindex` s
-						INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b ON b.`blog_id`=s.`content_id`
-						WHERE `searchword` in (" . $imploded .")
-						AND	s.`location` = '".BITBLOG_CONTENT_TYPE_GUID."' AND s.`content_id` = b.`blog_id`";
-		$cant = $this->mDb->getOne($querycant, $words);
+	function find_exact_generic($where, $words, $offset, $maxRecords) {
+		global $gPage, $gBitSystem, $gLibertySystem;
+		$allowed = array();
 		$ret    = array();
-		while ($res = $result->fetchRow()) {
-		  $res['href'] = BitBlog::getBlogUrl( $res["blog_id"] );
-		  $ret[] = $res;
+		foreach( $gLibertySystem->mContentTypes as $contentType ) {
+			if (($where == $contentType["content_type_guid"] or $where == "pages") 
+			and $this->has_permission($contentType["content_type_guid"])) {
+				$allowed[] = $contentType["content_type_guid"];
+			}
 		}
-		$ret = array('data' => $ret,'cant' => $cant);
-	  }
-	  return $ret;
-	}
-
-	function find_exact_blog_posts($words,$offset, $maxRecords) {
-		global $gBitSystem;
-		if ($gBitSystem->isPackageActive( 'blogs' ) && count($words) >0) {
-			require_once( BLOGS_PKG_PATH.'BitBlogPost.php' ); // Make sure the CONTENT_TYPE_GUID is defined
-			$imploded = implode(',', array_fill(0, count($words), '?'));
-			$query="SELECT DISTINCT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`,
-						s.`location`, s.`last_update`, s.`count`, tc.`data`, tc.`hits`, b.`title` as `btitle`,
-						tc.`created`, tc.`title`, tc.`format_guid`, tc.`format_guid`, b.`blog_id`, bp.`post_id`
-						FROM `".BIT_DB_PREFIX."tiki_searchindex` s
-						INNER JOIN `".BIT_DB_PREFIX."tiki_content`    tc ON tc.`content_id` =  s.`content_id`
-						INNER JOIN `".BIT_DB_PREFIX."tiki_blog_posts` bp ON tc.`content_id` = bp.`content_id`
-						INNER JOIN `".BIT_DB_PREFIX."tiki_blogs`       b ON bp.`blog_id`    =  b.`blog_id`
-						WHERE `searchword` IN (" . $imploded . ")
-						AND s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'
-						ORDER BY `hits` DESC";
-			$result    = $this->mDb->query($query,$words,$maxRecords,$offset);
-			$querycant = "SELECT COUNT(DISTINCT s.`content_id`)
-							FROM `".BIT_DB_PREFIX."tiki_searchindex` s
-							INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc    ON tc.`content_id`=  s.`content_id`
-							INNER JOIN `".BIT_DB_PREFIX."tiki_blog_posts` bp ON tc.`content_id`= bp.`content_id`
-							INNER JOIN `".BIT_DB_PREFIX."tiki_blogs` b       ON bp.`blog_id`   =  b.`blog_id`
-							WHERE `searchword` IN (" . $imploded . ") AND s.`location`='".BITBLOGPOST_CONTENT_TYPE_GUID."'";
-			$cant = $this->mDb->getOne($querycant, $words);
-			$ret  = array();
+		if (count($allowed) > 0) {
+			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
+			$qPlaceHolders2 = implode(',', array_fill(0, count($allowed), '?'));
+			$query = "SELECT DISTINCT tc.`content_id`, tc.`title`, tc.`format_guid`, si.`location`,
+							si.`last_update`, tc.`hits`, tc.`last_modified`, tc.`data`
+						FROM `" . BIT_DB_PREFIX . "tiki_searchindex` si 
+			  			INNER JOIN `" . BIT_DB_PREFIX . "tiki_content` tc ON tc.`content_id` = si.`content_id`
+			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
+			  		 	AND  si.`location` IN (" . $qPlaceHolders2 . ") ORDER BY `hits` desc";
+			$querycant = "SELECT COUNT(DISTINCT si.`content_id`)
+							FROM `".BIT_DB_PREFIX."tiki_searchindex` si 
+			  				INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON tc.`content_id` = si.`content_id`
+			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
+			  		 	AND  si.`location` IN (" . $qPlaceHolders2 . ")";
+			$result = $this->mDb->query($query, array_merge($words, $allowed), $maxRecords, $offset);
+			$cant   = $this->mDb->getOne($querycant, array_merge($words, $allowed));
 			while ($res = $result->fetchRow()) {
-				if( empty( $res['title'] ) ) {
-					$res['title'] = $res['btitle'];
-				}
-		  		$res['href'] = BitBlogPost::getDisplayUrl( $res["post_id"] );
+				$res['href'] = BIT_ROOT_URL . "index.php?content_id=" . $res['content_id'];
 				$ret[] = $res;
 			}
-			return array('data' => $ret,'cant' => $cant);
+			return array('data' => $ret, 'cant' => $cant);
 		} else {
 			return array('data' => array(),'cant' => 0);
 		}
 	}
 
-	function find_exact_articles($words, $offset, $maxRecords) {
-      global $gBitSystem;
-	  if ($gBitSystem->isPackageActive( 'articles' )  && count($words) > 0) {
-		require_once( ARTICLES_PKG_PATH.'BitArticle.php' ); // Make sure the CONTENT_TYPE_GUID is defined
-		$imploded = implode(',', array_fill(0, count($words), '?'));
-	    $query = "SELECT DISTINCT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`,
-	    		        tc.`format_guid`, s.`location`, s.`last_update`, s.`count`,
-	    		        a.`description`, tc.`hits`, a.`publish_date`, a.`article_id` 
-	    		  FROM `" . BIT_DB_PREFIX . "tiki_searchindex` s 
-	    		 		INNER JOIN `" . BIT_DB_PREFIX . "tiki_content` tc ON tc.`content_id` = s.`content_id`
-	    		 		INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` a ON tc.`content_id` = a.`content_id`
-	    		 WHERE `searchword` IN (" . $imploded . ") 
-		    		 	AND s.`location` = '" . BITARTICLE_CONTENT_TYPE_GUID . "' 
-		    		 	ORDER BY tc.`hits` DESC";
-	    $result = $this->mDb->query($query, $words, $maxRecords, $offset);
-	    $querycant = "SELECT COUNT(DISTINCT s.`content_id`) 
-		    		  	FROM `" . BIT_DB_PREFIX . "tiki_searchindex` s 
-		   		 		INNER JOIN `" . BIT_DB_PREFIX . "tiki_content` tc ON tc.`content_id` = s.`content_id`
-	    		 		INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` a ON tc.`content_id` = a.`content_id`
-	    				WHERE `searchword` IN (" . $imploded . ") 
-		    		 	AND s.`location` = '" . BITARTICLE_CONTENT_TYPE_GUID . "'";
-		$cant = $this->mDb->getOne($querycant, $words);
-	    $ret    = array();
-	    while ($res = $result->fetchRow()) {
-	      $res['href'] = ARTICLES_PKG_URL."read.php?article_id=".urlencode($res["article_id"]);
-	      $ret[] = $res;
-	    }
-	    return array('data' => $ret,'cant' => $cant);
-	  } else {
-	    return array('data' => array(),'cant' => 0);
-	  }
-	}
-
-	function find_exact_wiki($words,$offset, $maxRecords) {
-		global $gPage;
-		global $gBitSystem;
-		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
-			require_once( WIKI_PKG_PATH.'BitPage.php' ); // Make sure the CONTENT_TYPE_GUID is defined
-			$imploded = implode(',', array_fill(0, count($words), '?'));
-			$query = "SELECT DISTINCT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`, 
-						tc.`format_guid`, s.`location`, s.`last_update`, s.`count`, tc.`data`, tc.`hits`, 
-						tc.`last_modified`, p.`page_id`
-						FROM `".BIT_DB_PREFIX."tiki_searchindex` s 
-			  			INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON tc.`content_id` = s.`content_id`
-			  			INNER JOIN `".BIT_DB_PREFIX."tiki_pages`    p ON tc.`content_id` = p.`content_id`
-			  			WHERE `searchword` IN (" . $imploded . ")
-			  		 	AND s.`location` = '".BITPAGE_CONTENT_TYPE_GUID."' ORDER BY `count` desc";
-			$result = $this->mDb->query($query,$words,$maxRecords,$offset);
-			$querycant = "SELECT COUNT(DISTINCT s.`content_id`)
-							FROM `".BIT_DB_PREFIX."tiki_searchindex` s 
-			  				INNER JOIN `".BIT_DB_PREFIX."tiki_content` tc ON tc.`content_id` = s.`content_id`
-			  				INNER JOIN `".BIT_DB_PREFIX."tiki_pages`    p ON tc.`content_id` = p.`content_id`
-			  				WHERE `searchword` IN (" . $imploded . ")
-			  			 	AND s.`location` = '".BITPAGE_CONTENT_TYPE_GUID."'";
-			$cant   = $this->mDb->getOne($querycant, $words);
-			$ret    = array();
-			while ($res = $result->fetchRow()) {
-				$res['href'] = BitPage::getDisplayUrl( $res['title'], $res );
-				$ret[] = $res;
-			}
-			return array('data' => $ret,'cant' => $cant);
-		} else {
-			return array('data' => array(),'cant' => 0);
+	function has_permission($pContentType = "") {
+		global $gBitUser;
+		$ret = false;
+		switch ($pContentType) {
+			case "bitarticle"     : $perm = "bit_p_read_article";	break;
+			case "bitpage"        : $perm = "bit_p_view";			break;
+			case "bitblogpost"    : $perm = "bit_p_read_blog";	    break;
+			case "bitcomment"     : $perm = "bit_p_read_comments";	break;
+			case "fisheyegallery" : $perm = "bit_p_view_fisheye";	break;
+			default               : $perm = "";						break;
 		}
-	}
-
-	function find_exact_bitcomment($words,$offset, $maxRecords) {
-		global $gPage;
-		global $gBitSystem;
-		if ($gBitSystem->isPackageActive( 'wiki' ) && count($words) >0) {
-			require_once( LIBERTY_PKG_PATH.'LibertyComment.php' ); // Make sure the CONTENT_TYPE_GUID is defined
-			$imploded = implode(',', array_fill(0, count($words), '?'));
-			$query = "SELECT DISTINCT s.`content_id` || s.`location` AS `results_key`, tc.`title`, tc.`format_guid`,
-						tc.`format_guid`, s.`location`, s.`last_update`, s.`count`, tc.`data`, tc.`hits`,
-						tc.`last_modified`, tcc.*
-			  			FROM `".BIT_DB_PREFIX."tiki_searchindex` s
-			  			INNER JOIN `".BIT_DB_PREFIX."tiki_content`   tc ON tc.`content_id` =   s.`content_id`
-			  			INNER JOIN `".BIT_DB_PREFIX."tiki_comments` tcc ON tc.`content_id` = tcc.`content_id`
-			  			WHERE `searchword` IN (" . $imploded . ")
-			  		 	AND s.`location` = '".BITCOMMENT_CONTENT_TYPE_GUID."' ORDER BY `count` DESC";
-			$result = $this->mDb->query($query,$words,$maxRecords,$offset);
-			$querycant = "SELECT COUNT(DISTINCT s.`content_id`)
-				  			FROM `".BIT_DB_PREFIX."tiki_searchindex` s
-				  			INNER JOIN `".BIT_DB_PREFIX."tiki_content`   tc ON tc.`content_id` =   s.`content_id`
-				  			INNER JOIN `".BIT_DB_PREFIX."tiki_comments` tcc ON tc.`content_id` = tcc.`content_id`
-			  				WHERE `searchword` IN (" . $imploded . ")
-			  			 	AND s.`location` = '".BITCOMMENT_CONTENT_TYPE_GUID."'";
-			$cant   = $this->mDb->getOne($querycant, $words);
-			$ret    = array();
-			while ($res = $result->fetchRow()) {
-				$res['href'] = LibertyComment::getDisplayUrl( $res['title'], $res );
-				$ret[] = $res;
-			}
-			return array('data' => $ret,'cant' => $cant);
-		} else {
-			return array('data' => array(),'cant' => 0);
-		}
+		return $gBitUser->hasPermission($perm);
 	}
 
 } # class SearchLib

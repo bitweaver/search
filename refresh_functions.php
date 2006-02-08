@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.14 2006/01/29 17:51:57 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.15 2006/02/08 03:16:12 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.14 2006/01/29 17:51:57 lsces Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.15 2006/02/08 03:16:12 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -21,7 +21,7 @@
  * I believe these functiions are from tiki. They are called every x refreshes of a browser.
  * They appear to pick a random wiki page, comment, blog or article and index it.
  * With the exception of blogs (blog headers not blog posts) they pick the content_id
- * and pass it to refresh_index_tiki_content() to do the work.
+ * and pass it to refresh_index() to do the work.
  */
 
 function random_refresh_index($pContentType = "") {
@@ -46,8 +46,8 @@ function random_refresh_index($pContentType = "") {
 		$cant = $gBitSystem->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . $table . "`", array());
 		if($cant > 0) {
 			$query     = "SELECT `content_id` FROM `" . BIT_DB_PREFIX . $table . "`";
-			$contentID = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
-			refresh_index_tiki_content($contentID);
+			$contentId = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
+			refresh_index($contentId);
 		}
 	}
 }
@@ -59,14 +59,19 @@ function random_refresh_index($pContentType = "") {
  * This currently works for wiki pages, blog posts and articles.
  */
 
-function refresh_index_tiki_content( $pContentID = 0 ) {
+function refresh_index( $pvContentId = 0 ) {
 	global $gBitSystem;
+	if (is_object($pvContentId)) {  // InvokeService calls pass objects.
+		$contentId = $pvContentId->mContentId;
+	} else {
+		$contentId = $pvContentId;
+	}
 	require_once( LIBERTY_PKG_PATH.'LibertyComment.php' );
 	require_once( WIKI_PKG_PATH.'BitPage.php' );
 	require_once( BLOGS_PKG_PATH.'BitBlogPost.php' );
 	require_once( ARTICLES_PKG_PATH.'BitArticle.php' );
-	if ($pContentID > 0) {
-		$sql   = "SELECT `content_type_guid` FROM `" . BIT_DB_PREFIX . "tiki_content` WHERE `content_id` = " . $pContentID;
+	if ($contentId > 0) {
+		$sql   = "SELECT `content_type_guid` FROM `" . BIT_DB_PREFIX . "tiki_content` WHERE `content_id` = " . $contentId;
 		$cGUID = $gBitSystem->mDb->getOne($sql, array());
 		switch ($cGUID) {
 			case BITCOMMENT_CONTENT_TYPE_GUID :
@@ -94,12 +99,12 @@ function refresh_index_tiki_content( $pContentID = 0 ) {
 		$query = "SELECT tc.`title`, tc.`data`, uu.`login`, uu.`real_name`" . $auxField . " " .
 					"FROM `" . BIT_DB_PREFIX . "tiki_content` tc " .  
 					"INNER JOIN `" . BIT_DB_PREFIX . "users_users` uu ON uu.`user_id` = tc.`user_id`" .
-					$auxJoin . " WHERE tc.`content_id` = " . $pContentID;
+					$auxJoin . " WHERE tc.`content_id` = " . $contentId;
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
 		$words  = search_index($res["title"] . " " . $res["data"] . " " . $res["login"] . " " . $res["real_name"] . 
 		          (empty($pAuxTable) ? "" : " " . $res["description"]));
-		insert_index($words, $cGUID, $pContentID);
+		insert_index($words, $cGUID, $contentId);
 	}
 }
 
@@ -114,33 +119,33 @@ function random_refresh_index_blogs() {
 		$cant = $gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."tiki_blogs`", array());
 		if($cant > 0) {
 			$query  = "select `blog_id` from `" . BIT_DB_PREFIX . "tiki_blogs`";
-			$blogID = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
-			refresh_index_blogs($blogID);
+			$blogId = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
+			refresh_index_blogs($blogId);
 		}
 	}
 }
 
-function refresh_index_blogs( $pBlogID = 0 ) {
+function refresh_index_blogs( $pBlogId = 0 ) {
 	global $gBitSystem;
-	if( $pBlogID > 0 and $gBitSystem->isPackageActive( 'blogs' ) ) {
+	if( $pBlogId > 0 and $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
 		$query = "SELECT tb.`title`, tb.`description`, uu.`login` as `user`, uu.`real_name`
 					FROM `".BIT_DB_PREFIX."tiki_blogs` tb
 					INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = tb.`user_id`
-					WHERE `blog_id` = " . $pBlogID;
+					WHERE `blog_id` = " . $pBlogId;
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
 		$words  = search_index($res["title"]." ".$res["user"]." ".$res["real_name"]." ".$res["description"]);
-		insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogID);
+		insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogId);
 	}
 }
 
 function refresh_index_oldest(){
 	global $gBitSystem;
-	$contentID = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
+	$contentId = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
 				"tiki_searchindex` ORDER BY `last_update`", array());
-	if ( isset($contentID) ) {
-		refresh_index_tiki_content($contentID);
+	if ( isset($contentId) ) {
+		refresh_index($contentId);
 	}
 }
 
@@ -204,7 +209,7 @@ function rebuild_index($pContentType) {
 	if( $result ) {
 		while ($res = $result->fetchRow()) {
 			$contentId = $res["content_id"];
-			refresh_index_tiki_content($contentId);
+			refresh_index($contentId);
 		}
 	}
 }

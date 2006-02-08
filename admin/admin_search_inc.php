@@ -1,16 +1,16 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.4 2006/01/29 05:16:44 seannerd Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.1.1.1.2.5 2006/02/08 03:16:10 seannerd Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 $formSearchToggles = array(
-	'feature_search_fulltext' => array(
+/*	'feature_search_fulltext' => array(
 		'label' => 'Fulltext Search',
-		'note' => 'Enable Fulltext Search of all content. This enables users to serach the content of wiki pages, articles, blogs and other similar content.',
+		'note' => 'Enable Fulltext Search of all content. This enables users to search the content of wiki pages, articles, blogs and other similar content.',
 //		'page' => 'FullTextSearch',
-	),
+	), */
 	'feature_search_stats' => array(
 		'label' => 'Search Statistics',
 		'note' => 'Record searches made and their frequency.',
@@ -48,12 +48,14 @@ $formSearchInts = array(
 	),
 );
 
+/*
 foreach( $gLibertySystem->mContentTypes as $cType ) {
 	$contentTypes[$cType['content_type_guid']] = $cType['content_type_guid'];
 	$contentDescriptions[$cType['content_type_guid']] = $cType['content_description'];
 }
 $gBitSmarty->assign( 'contentTypes', $contentTypes );
 $gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
+*/
 
 if (isset($_REQUEST["searchaction"])) {
 	switch (strtolower($_REQUEST["searchaction"])) {

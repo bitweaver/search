@@ -25,7 +25,7 @@
 		{/foreach}
 
 		<div class="row submit">
-			<input type="submit" name="searchprefs" value="{tr}Change preferences{/tr}" />
+			<input type="submit" name="searchaction" value="{tr}Change preferences{/tr}" />
 		</div>
 		{/form}
 	{/jstab}
