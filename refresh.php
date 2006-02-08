@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.6 2006/02/08 20:21:32 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
+ * $Id: refresh.php,v 1.6 2006/02/08 20:21:32 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -59,7 +59,8 @@ function refresh_search_index() {
 		global $gBitSystem, $gBitDbName;
 		$gBitSystem->mDb->mDb->SelectDB( $gBitDbName );
 
-		call_user_func( $key, $locs[$key] );
+		if ( !empty ($key) )
+			call_user_func( $key, $locs[$key] );
 	}
 }
 
