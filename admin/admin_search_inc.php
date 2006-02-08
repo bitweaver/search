@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.5 2006/02/08 08:24:21 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.6 2006/02/08 21:51:15 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -40,7 +40,7 @@ $formSearchInts = array(
 	),
 	'search_lru_purge_rate' => array(
 		'label' => 'Least Recently Used (LRU) list purging rate',
-		'note' => 'Purge the results cache every "rate" pages. This will keep space available in the cache for new seach results',
+		'note' => 'Purge the results cache every "rate" pages. This will keep space available in the cache for new search results',
 	),
 	'search_lru_length' => array(
 		'label' => 'Least Recently Used (LRU) list length',
@@ -61,11 +61,11 @@ if (isset($_REQUEST["searchaction"])) {
 	switch (strtolower($_REQUEST["searchaction"])) {
 		case "change preferences" :
 			foreach( $formSearchInts as $item => $data ) {
-				simple_set_int( $item );
+				simple_set_int( $item, SEARCH_PKG_NAME );
 				$formSearchInts[$item]['value'] = $_REQUEST[$item];
 			}
 			foreach( $formSearchToggles as $item => $data ) {
-				simple_set_toggle( $item );
+				simple_set_toggle( $item, SEARCH_PKG_NAME );
 			}
 			break;
 		case "clear searchwords" :
