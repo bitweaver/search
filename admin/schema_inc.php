@@ -2,7 +2,7 @@
 
 $tables = array(
 
-'tiki_searchindex' => "
+'searchindex' => "
 	searchword C(80) PRIMARY,
 	location C(80) PRIMARY,
 	content_id I4 PRIMARY,
@@ -10,18 +10,18 @@ $tables = array(
 	last_update I4 NOTNULL
 ",
 
-'tiki_searchsyllable' => "
+'searchsyllable' => "
 	syllable C(80) PRIMARY,
 	last_used I4 NOTNULL,
 	last_updated I4 NOTNULL
 ",
 
-'tiki_searchwords' => "
+'searchwords' => "
 	syllable C(80) KEY,
 	searchword C(80) KEY
 ",
 
-'tiki_search_stats' => "
+'search_stats' => "
 	term C(50) PRIMARY,
 	hits I4
 "
@@ -36,11 +36,11 @@ foreach( array_keys( $tables ) AS $tableName ) {
 }
 
 $indices = array (
-	'tiki_searchidx_last_update_idx' => array( 'table' => 'tiki_searchindex', 'cols' => 'last_update', 'opts' => NULL ),
-	'tiki_searchidx_word_idx' => array( 'table' => 'tiki_searchindex', 'cols' => 'searchword', 'opts' => NULL ),
-	'tiki_searchidx_con_idx' => array( 'table' => 'tiki_searchindex', 'cols' => 'content_id', 'opts' => NULL ),
-	'tiki_searchidx_loc_idx' => array( 'table' => 'tiki_searchindex', 'cols' => 'location', 'opts' => NULL ),
-	'tiki_searchsyl_last_used_idx' => array( 'table' => 'tiki_searchsyllable', 'cols' => 'last_used', 'opts' => NULL )
+	'searchidx_last_update_idx' => array( 'table' => 'searchindex', 'cols' => 'last_update', 'opts' => NULL ),
+	'searchidx_word_idx' => array( 'table' => 'searchindex', 'cols' => 'searchword', 'opts' => NULL ),
+	'searchidx_con_idx' => array( 'table' => 'searchindex', 'cols' => 'content_id', 'opts' => NULL ),
+	'searchidx_loc_idx' => array( 'table' => 'searchindex', 'cols' => 'location', 'opts' => NULL ),
+	'searchsyl_last_used_idx' => array( 'table' => 'searchsyllable', 'cols' => 'last_used', 'opts' => NULL )
 );
 
 $gBitInstaller->registerSchemaIndexes( SEARCH_PKG_NAME, $indices );
@@ -57,6 +57,7 @@ $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 $gBitInstaller->registerPreferences( SEARCH_PKG_NAME, array(
 	array(SEARCH_PKG_NAME, 'search_fulltext','y'),
 	array(SEARCH_PKG_NAME, 'search_stats','n'),
+	array(SEARCH_PKG_NAME, 'search_index_on_submit','n'),
 	array(SEARCH_PKG_NAME, 'search_refresh_rate','5'),
 	array(SEARCH_PKG_NAME, 'search_min_wordlength','3'),
 	array(SEARCH_PKG_NAME, 'search_max_syllwords','100'),

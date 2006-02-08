@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.8 2006/02/06 22:56:48 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.9 2006/02/08 08:24:20 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -16,10 +16,16 @@ $searchlib = &new SearchLib();
 
 $gBitSystem->verifyPackage( 'search' );
 
-foreach( $gLibertySystem->mContentTypes as $cType ) {
-	$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+$contentTypes        = array();
+$contentDescriptions = array();
+foreach( $gLibertySystem->mContentTypes as $contentType ) {
+	if ($searchlib->has_permission($contentType["content_type_guid"])) {
+		$contentTypes[]        = $contentType["content_type_guid"];
+		$contentDescriptions[] = $contentType["content_description"];
+	}
 }
 $gBitSmarty->assign( 'contentTypes', $contentTypes );
+$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
 
 if( !empty($_REQUEST["highlight"]) ) {
   $_REQUEST["words"]=$_REQUEST["highlight"];
@@ -29,126 +35,81 @@ if( !empty($_REQUEST["highlight"]) ) {
 	die;
 }
 
-if ($gBitSystem->isFeatureActive( 'search_stats' )) {
+if ($gBitSystem->isFeatureActive("feature_search_stats")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
-if (!isset($_REQUEST["where"])) {
-	$where = 'pages';
-} else {
+$where = 'pages';
+if (isset($_REQUEST["where"])) {
 	$where = $_REQUEST["where"];
 }
 
-$gBitSmarty->assign('where',$where);
-$gBitSmarty->assign('where2',tra($where));
-
-if($where=='wikis') {
-	$gBitSystem->verifyPackage( 'wiki' );
-	$gBitSystem->verifyPermission( 'bit_p_view' );
-}
-
-if($where=='directory') {
-	$gBitSystem->verifyPackage( 'directory' );
-	$gBitSystem->verifyPermission( 'bit_p_view_directory' );
-}
-
-if($where=='faqs') {
-	$gBitSystem->verifyPackage( 'faqs' );
-	$gBitSystem->verifyPermission( 'bit_p_view_faqs' );
-}
-
-if($where=='forums') {
-	$gBitSystem->verifyPackage( 'forums' );
-	$gBitSystem->verifyPermission( 'bit_p_forum_read' );
-}
-
-if($where=='files') {
-	$gBitSystem->verifyPackage( 'files' );
-	$gBitSystem->verifyPermission( 'bit_p_view_file_gallery' );
-}
-
-if($where=='articles') {
-	$gBitSystem->verifyPackage( 'articles' );
-	$gBitSystem->verifyPermission( 'bit_p_read_article' );
-}
-
-if (($where=='galleries' || $where=='images')) {
-	$gBitSystem->verifyPackage( 'image_gals' );
-	$gBitSystem->verifyPermission( 'bit_p_view_image_gallery' );
-}
-
-if(($where=='blogs' || $where=='posts')) {
-	$gBitSystem->verifyPackage( 'blogs' );
-	$gBitSystem->verifyPermission( 'bit_p_read_blog' );
-}
-
-if(($where=='trackers')) {
-	$gBitSystem->verifyPackage( 'trackers' );
-	$gBitSystem->verifyPermission( 'bit_p_view_trackers' );
-}
-
-// Already assigned above! $gBitSmarty->assign('where',$where);
-if (!isset($_REQUEST["offset"])) {
-	$offset = 0;
+if( isset( $_REQUEST['usePart'] ) && $_REQUEST['usePart']=='on' ) {
+	$_REQUEST['usePart']=true;
 } else {
+	$_REQUEST['usePart']=false;
+}
+$gBitSmarty->assign('searchType', $_REQUEST['usePart'] ? "Using Partial Word Search" : "Using Exact Word Search");
+
+$offset = 0;
+if (isset($_REQUEST["offset"])) {
 	$offset = $_REQUEST["offset"];
 }
-if (isset($_REQUEST['page'])) {
-	$page = &$_REQUEST['page'];
+if (isset($_REQUEST['list_page'])) {
+	$page = &$_REQUEST['list_page'];
 	$offset = ($page - 1) * $max_records;
 }
-$gBitSmarty->assign_by_ref('offset', $offset);
 
 // Build the query using words
+
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
-	$results = $searchlib->find($where,' ', $offset, $max_records, $gBitSystem->isFeatureActive( 'search_fulltext' ));
-
-	$gBitSmarty->assign('words', '');
+	$words = '';
 } else {
-	$words = strip_tags($_REQUEST["words"]);
-	$results = $searchlib->find($where,$words, $offset, $max_records, $gBitSystem->isFeatureActive( 'search_fulltext' ));
+	$words   = strip_tags($_REQUEST["words"]);
+}
+$gBitSmarty->assign('words', $words);
+$results = $searchlib->find($where, $words, $offset, $max_records, $_REQUEST["usePart"]);
+$cant    = $results['cant']; 
 
-	$gBitSmarty->assign('words', $words);
+switch ($where) {
+	case "bitarticle"  : $where2 = "Article";	break;
+	case "bitpage"     : $where2 = "Wiki Page";	break;
+	case "bitblogpost" : $where2 = "Blog Post";	break;
+	case "bitcomment"  : $where2 = "Comment";	break;
+	default            : $where2 = "Page";		break;
 }
 
-//if ($fulltext == 'y') {
-//	$CurrentIndex = -1;
-//	$CurrentData = NULL;
-//	foreach ($results["data"] as $current) {
-//		if ($current["relevance"] > 0) {
-//			$CurrentData[++$CurrentIndex] = $current;
-//		}
-//	}
-//	$results['data'] = $CurrentData;
-//	$results['cant'] = $CurrentIndex + 1;
-//}
-$stubContent = new LibertyContent();
+if ($cant <> 1) $where2 .= "s"; 
+$gBitSmarty->assign('where', $where);
+$gBitSmarty->assign('where2', tra($where2));
 
-if ( $results['cant'] > 0 ) {
+$stubContent = new LibertyContent();
+if ( $cant > 0 ) {
 	foreach( array_keys( $results['data'] ) as $k ) {
+		if( empty( $results['data'][$k]['title'] ) ) {
+			$date_format = $gBitSystem->get_long_date_format();
+			if( $gBitSystem->mServerTimestamp->get_display_offset() ) {
+				$date_format = preg_replace( "/ ?%Z/", "", $date_format );
+			} else {
+				$date_format = preg_replace( "/%Z/", "UTC", $date_format );
+			}
+			$date_string = $gBitSystem->mServerTimestamp->getDisplayDateFromUTC( $results['data'][$k]['created'] );
+			$results['data'][$k]['title'] = $gBitSystem->mServerTimestamp->strftime( $date_format, $date_string, true );
+		}
 		if( !empty( $results['data'][$k]['data'] ) ) {
 			$results['data'][$k]['parsed'] = $stubContent->parseData( $results['data'][$k]['data'], $results['data'][$k]['format_guid'] );
 		}
 	}
 }
+LibertyContent::prepGetList($_REQUEST);
+$_REQUEST['cant'] = $cant;
+$_REQUEST['control']['parameters']['highlight'] = $_REQUEST["highlight"];
+LibertyContent::postGetList( $_REQUEST );
+$gBitSmarty->assign_by_ref( 'listInfo', $_REQUEST["control"] );
+$gBitSmarty->assign('cant_results', $cant);
 
-$cant_pages = ceil($results["cant"] / $max_records);
-$gBitSmarty->assign('cant_results', $results["cant"]);
-$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
-$gBitSmarty->assign('actual_page', 1 + ($offset / $max_records));
-
-if ($results["cant"] > ($offset + $max_records)) {
-	$gBitSmarty->assign('next_offset', $offset + $max_records);
-} else {
-	$gBitSmarty->assign('next_offset', -1);
-}
-
-// If offset is > 0 then prev_offset
-if ($offset > 0) {
-	$gBitSmarty->assign('prev_offset', $offset - $max_records);
-} else {
-	$gBitSmarty->assign('prev_offset', -1);
-}
+$partialOnOff = $_REQUEST["usePart"] ? 'checked' : '';
+$gBitSmarty->assign('partialOnOff', $partialOnOff);
 
 // Find search results (build array)
 $gBitSmarty->assign_by_ref('results', $results["data"]);

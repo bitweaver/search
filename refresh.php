@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.4 2005/11/22 07:27:43 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh.php,v 1.4 2005/11/22 07:27:43 squareing Exp $
+ * $Id: refresh.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -34,22 +34,23 @@ function refresh_search_index() {
 		$locs=array();
 		if( $gBitSystem->isPackageActive( 'wiki' ) ) {
 			// if wiki is active, let's always refresh
-			random_refresh_index_wiki();
+			random_refresh_index("wiki");
 		}
 		if( $gBitSystem->isPackageActive( 'articles' ) ) {
-			$locs[]="random_refresh_index_articles";
+			$locs[''] = ARTICLES_PKG_NAME;
 		}
 		if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-			$locs[]="random_refresh_index_blogs";
-			$locs[]="random_refresh_index_blog_posts";
+			//Can't use the new random function with blogs - they aren'tin liberty_content yet.
+			$locs['random_refresh_index_blogs'] = '';
+			//Can use new function for blog_posts though ...
+			$locs['random_refresh_index']="blog_posts";
 		}
 
 		// comments can be everywhere?
-		$locs[]="random_refresh_index_comments";
+		$locs['random_refresh_index'] = "comments";
 		// some refreshes to enhance the refreshing stats
-		$locs[]="refresh_index_oldest";
-		//print_r($locs);
-		$location=$locs[rand(0,count($locs)-1)];
+		$locs['refresh_index_oldest'] = "";
+		$key = array_rand( $locs );
 		// random refresh
 
 		// hack around php database driver issues when a different database from bitweaver is accessed elsewhere during page  render
@@ -58,8 +59,7 @@ function refresh_search_index() {
 		global $gBitSystem, $gBitDbName;
 		$gBitSystem->mDb->mDb->SelectDB( $gBitDbName );
 
-		//echo "$location";
-		call_user_func ($location);
+		call_user_func( $key, $locs[$key] );
 	}
 }
 

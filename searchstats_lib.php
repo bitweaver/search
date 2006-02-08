@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/searchstats_lib.php,v 1.4 2006/02/06 00:10:42 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/searchstats_lib.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: searchstats_lib.php,v 1.4 2006/02/06 00:10:42 squareing Exp $
+ * $Id: searchstats_lib.php,v 1.5 2006/02/08 08:24:20 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -22,7 +22,7 @@ class SearchStatsLib extends BitBase {
 	}
 
 	function clear_search_stats() {
-		$query = "delete from `".BIT_DB_PREFIX."tiki_search_stats";
+		$query = "delete from `".BIT_DB_PREFIX."search_stats";
 		$result = $this->mDb->query($query,array());
 	}
 
@@ -36,8 +36,8 @@ class SearchStatsLib extends BitBase {
 			$bindvars = array();
 		}
 
-		$query = "select * from `".BIT_DB_PREFIX."tiki_search_stats` $mid order by ".$this->mDb->convert_sortmode($sort_mode);
-		$query_cant = "select count(*) from `".BIT_DB_PREFIX."tiki_search_stats` $mid";
+		$query = "select * from `".BIT_DB_PREFIX."search_stats` $mid order by ".$this->mDb->convert_sortmode($sort_mode);
+		$query_cant = "select count(*) from `".BIT_DB_PREFIX."search_stats` $mid";
 		$result = $this->mDb->query($query,$bindvars,$max_records,$offset);
 		$cant = $this->mDb->getOne($query_cant,$bindvars);
 		$ret = array();

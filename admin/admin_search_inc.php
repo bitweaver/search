@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.4 2006/02/06 22:56:48 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.5 2006/02/08 08:24:21 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -15,6 +15,10 @@ $formSearchToggles = array(
 		'label' => 'Search Statistics',
 		'note' => 'Record searches made and their frequency.',
 //		'page' => 'SearchStats',
+	),
+	'search_index_on_submit' => array(
+		'label' => 'Index On Submit',
+		'note' => 'Index articles, blogs and wiki pages immdiately on submission. If unchecked, pages will be updated randomly according the the refresh rate below.',
 	),
 );
 $formSearchInts = array(
@@ -43,15 +47,39 @@ $formSearchInts = array(
 		'note' => 'Limit the results cache to this number of entries',
 	),
 );
-if (isset($_REQUEST["searchprefs"])) {
-	
-	foreach( $formSearchInts as $item => $data ) {
-		simple_set_int( $item );
-		$formSearchInts[$item]['value'] = $_REQUEST[$item];
-	}
 
-	foreach( $formSearchToggles as $item => $data ) {
-		simple_set_toggle( $item );
+/*
+foreach( $gLibertySystem->mContentTypes as $cType ) {
+	$contentTypes[$cType['content_type_guid']] = $cType['content_type_guid'];
+	$contentDescriptions[$cType['content_type_guid']] = $cType['content_description'];
+}
+$gBitSmarty->assign( 'contentTypes', $contentTypes );
+$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
+*/
+
+if (isset($_REQUEST["searchaction"])) {
+	switch (strtolower($_REQUEST["searchaction"])) {
+		case "change preferences" :
+			foreach( $formSearchInts as $item => $data ) {
+				simple_set_int( $item );
+				$formSearchInts[$item]['value'] = $_REQUEST[$item];
+			}
+			foreach( $formSearchToggles as $item => $data ) {
+				simple_set_toggle( $item );
+			}
+			break;
+		case "clear searchwords" :
+			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
+			delete_search_words_and_syllables();
+			break;
+		case "delete index only" :
+			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
+			delete_index($_REQUEST["where"]);
+			break;
+		case "delete and rebuild index" :
+			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
+			rebuild_index($_REQUEST["where"]);
+			break;
 	}
 } else {
 	foreach( $formSearchInts as $item => $data ) {

@@ -1,7 +1,7 @@
 {strip}
 <div class="display search">
 	<div class="header">
-		<h1>{tr}Search results{/tr}</h1>
+		<h1>{tr}Search {if $words}Results{else}Page{/if}{/tr}</h1>
 	</div>
 
 	<div class="body">
@@ -14,6 +14,14 @@
 						{html_options output=$contentTypes values=$contentTypes}
 					</select>
 					{formhelp note="Limit search to the selected Liberty package"}
+				{/forminput}
+			</div>
+
+			<div class="row">
+				{formlabel label="Use Partial Word Search" for="usePart"}
+				{forminput}
+					<input type="checkbox" name="usePart" id="usePart" {$partialOnOff} />
+					{formhelp note="This may slow search results"}
 				{/forminput}
 			</div>
 
