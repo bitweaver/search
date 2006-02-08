@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.11 2006/02/08 03:16:12 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.12 2006/02/08 04:26:35 mej Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.11 2006/02/08 03:16:12 seannerd Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.12 2006/02/08 04:26:35 mej Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -170,7 +170,7 @@ class SearchLib extends BitBase {
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 			$qPlaceHolders2 = implode(',', array_fill(0, count($allowed), '?'));
 			$query = "SELECT DISTINCT tc.`content_id`, tc.`title`, tc.`format_guid`, si.`location`,
-							si.`last_update`, tc.`hits`, tc.`last_modified`, tc.`data`
+							si.`last_update`, tc.`hits`, tc.`created`, tc.`last_modified`, tc.`data`
 						FROM `" . BIT_DB_PREFIX . "tiki_searchindex` si 
 			  			INNER JOIN `" . BIT_DB_PREFIX . "tiki_content` tc ON tc.`content_id` = si.`content_id`
 			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
