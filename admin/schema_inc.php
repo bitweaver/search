@@ -4,9 +4,8 @@ $tables = array(
 
 'searchindex' => "
 	searchword C(80) PRIMARY,
-	location C(80) PRIMARY,
 	content_id I4 PRIMARY,
-	count I4 NOTNULL default '1',
+	count I4 NOTNULL DEFAULT '1',
 	last_update I4 NOTNULL
 ",
 
@@ -39,7 +38,6 @@ $indices = array (
 	'searchidx_last_update_idx' => array( 'table' => 'searchindex', 'cols' => 'last_update', 'opts' => NULL ),
 	'searchidx_word_idx' => array( 'table' => 'searchindex', 'cols' => 'searchword', 'opts' => NULL ),
 	'searchidx_con_idx' => array( 'table' => 'searchindex', 'cols' => 'content_id', 'opts' => NULL ),
-	'searchidx_loc_idx' => array( 'table' => 'searchindex', 'cols' => 'location', 'opts' => NULL ),
 	'searchsyl_last_used_idx' => array( 'table' => 'searchsyllable', 'cols' => 'last_used', 'opts' => NULL )
 );
 
@@ -48,14 +46,14 @@ $gBitInstaller->registerSchemaIndexes( SEARCH_PKG_NAME, $indices );
 $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 	'description' => "This package makes any content on your site searchable.",
 	'license' => '<a href="http://www.gnu.org/licenses/licenses.html#LGPL">LGPL</a>',
-	'version' => '0.1',
+	'version' => '0.2',
 	'state' => 'alpha',
 	'dependencies' => '',
 ) );
 
 // ### Default Preferences
+//	array(SEARCH_PKG_NAME, 'search_fulltext','y'),
 $gBitInstaller->registerPreferences( SEARCH_PKG_NAME, array(
-	array(SEARCH_PKG_NAME, 'search_fulltext','y'),
 	array(SEARCH_PKG_NAME, 'search_stats','n'),
 	array(SEARCH_PKG_NAME, 'search_index_on_submit','n'),
 	array(SEARCH_PKG_NAME, 'search_refresh_rate','5'),

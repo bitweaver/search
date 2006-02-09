@@ -42,7 +42,7 @@
 		{section  name=search loop=$results}
 			{* using capture for no particular reason appart from a nicer layout - xing *}
 			{capture name=title}
-				{assign var=guid value=$results[search].location}
+				{assign var=guid value=$results[search].content_type_guid}
 				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title}</a>
 				<small> &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
 					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}

@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.12 2006/02/08 08:24:20 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.13 2006/02/09 10:59:59 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.12 2006/02/08 08:24:20 lsces Exp $
+ * $Id: search_lib.php,v 1.13 2006/02/09 10:59:59 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -159,6 +159,8 @@ class SearchLib extends BitBase {
 		global $gPage, $gBitSystem, $gLibertySystem;
 		$allowed = array();
 		$ret    = array();
+//To be replaced with group table from users
+		$groups = array( '-1','0' );
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
 			if (($where == $contentType["content_type_guid"] or $where == "pages") 
 			and $this->has_permission($contentType["content_type_guid"])) {
@@ -168,19 +170,22 @@ class SearchLib extends BitBase {
 		if (count($allowed) > 0) {
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 			$qPlaceHolders2 = implode(',', array_fill(0, count($allowed), '?'));
-			$query = "SELECT DISTINCT lc.`content_id`, lc.`title`, lc.`format_guid`, si.`location`,
+			$qPlaceHolders3 = implode(',', array_fill(0, count($groups), '?'));
+			$query = "SELECT DISTINCT lc.`content_id`, lc.`title`, lc.`format_guid`, si.`content_type_guid`,
 							si.`last_update`, lc.`hits`, lc.`created`, lc.`last_modified`, lc.`data`
 						FROM `" . BIT_DB_PREFIX . "searchindex` si 
 			  			INNER JOIN `" . BIT_DB_PREFIX . "liberty_content` lc ON lc.`content_id` = si.`content_id`
 			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
-			  		 	AND  si.`location` IN (" . $qPlaceHolders2 . ") ORDER BY `hits` desc";
+			  		 	AND  lc.`content_type_guid` IN (" . $qPlaceHolders2 . ")
+			  		 	AND  lc.`group_id` IN (" . $qPlaceHolders3 . ") ORDER BY `hits` desc";
 			$querycant = "SELECT COUNT(DISTINCT si.`content_id`)
 							FROM `".BIT_DB_PREFIX."searchindex` si 
 			  				INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON lc.`content_id` = si.`content_id`
 			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
-			  		 	AND  si.`location` IN (" . $qPlaceHolders2 . ")";
-			$result = $this->mDb->query($query, array_merge($words, $allowed), $max_records, $offset);
-			$cant   = $this->mDb->getOne($querycant, array_merge($words, $allowed));
+			  		 	AND  lc.`content_type_guid` IN (" . $qPlaceHolders2 . ")
+			  		 	AND  lc.`group_id` IN (" . $qPlaceHolders3 . ") ";
+			$result = $this->mDb->query($query, array_merge($words, $allowed, $groups), $max_records, $offset);
+			$cant   = $this->mDb->getOne($querycant, array_merge($words, $allowed, $groups));
 			while ($res = $result->fetchRow()) {
 				$res['href'] = BIT_ROOT_URL . "index.php?content_id=" . $res['content_id'];
 				$ret[] = $res;

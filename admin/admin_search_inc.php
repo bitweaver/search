@@ -1,16 +1,11 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.7 2006/02/09 10:30:38 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.8 2006/02/09 10:59:59 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
 $formSearchToggles = array(
-	'search_fulltext' => array(
-		'label' => 'Fulltext Search',
-		'note' => 'Enable Fulltext Search of all content. This enables users to serach the content of wiki pages, articles, blogs and other similar content.',
-//		'page' => 'FullTextSearch',
-	),
 	'search_stats' => array(
 		'label' => 'Search Statistics',
 		'note' => 'Record searches made and their frequency.',
@@ -48,15 +43,6 @@ $formSearchInts = array(
 	),
 );
 
-/*
-foreach( $gLibertySystem->mContentTypes as $cType ) {
-	$contentTypes[$cType['content_type_guid']] = $cType['content_type_guid'];
-	$contentDescriptions[$cType['content_type_guid']] = $cType['content_description'];
-}
-$gBitSmarty->assign( 'contentTypes', $contentTypes );
-$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
-*/
-
 if (isset($_REQUEST["searchaction"])) {
 	switch (strtolower($_REQUEST["searchaction"])) {
 		case "change preferences" :
@@ -74,7 +60,7 @@ if (isset($_REQUEST["searchaction"])) {
 			break;
 		case "delete index only" :
 			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
-			delete_index($_REQUEST["where"]);
+			delete_index_content_type($_REQUEST["where"]);
 			break;
 		case "delete and rebuild index" :
 			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
