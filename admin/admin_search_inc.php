@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.6 2006/02/08 21:51:15 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.7 2006/02/09 10:30:38 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -83,7 +83,7 @@ if (isset($_REQUEST["searchaction"])) {
 	}
 } else {
 	foreach( $formSearchInts as $item => $data ) {
-		$formSearchInts[$item]['value'] = $gBitSystem->mPrefs[$item];
+		$formSearchInts[$item]['value'] = $gBitSystem->getPreference( $item );
 	}
 }
 $gBitSmarty->assign( 'formSearchToggles',$formSearchToggles );
