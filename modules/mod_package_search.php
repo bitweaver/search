@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.4 2006/02/08 08:24:21 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.5 2006/02/09 11:12:45 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_package_search.php,v 1.4 2006/02/08 08:24:21 lsces Exp $
+ * $Id: mod_package_search.php,v 1.5 2006/02/09 11:12:45 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
@@ -36,10 +36,10 @@
 			default            : $perm = "";	break;
 		}
 		$show = false;
-		if (!empty($perm) and $gBitUser->hasPermission($perm)) {
+//		if (!empty($perm) and $gBitUser->hasPermission($perm)) {
 			$contentTypes[]        = $contentType["content_type_guid"];
 			$contentDescriptions[] = $contentType["content_description"];
-		}
+//		}
 	}
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 	$gBitSmarty->assign( 'contentDescriptions', $contentDescriptions );
