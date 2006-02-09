@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.13 2006/02/09 10:59:59 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.14 2006/02/09 11:49:11 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.13 2006/02/09 10:59:59 lsces Exp $
+ * $Id: search_lib.php,v 1.14 2006/02/09 11:49:11 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -156,11 +156,11 @@ class SearchLib extends BitBase {
 	}
 
 	function find_exact_generic($where, $words, $offset, $max_records) {
-		global $gPage, $gBitSystem, $gLibertySystem;
+		global $gPage, $gBitSystem, $gLibertySystem, $gBitUser;
 		$allowed = array();
 		$ret    = array();
-//To be replaced with group table from users
-		$groups = array( '-1','0' );
+		$groups = array_keys($gBitUser->mGroups);
+
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
 			if (($where == $contentType["content_type_guid"] or $where == "pages") 
 			and $this->has_permission($contentType["content_type_guid"])) {
