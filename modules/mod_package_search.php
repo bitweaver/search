@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.6 2006/02/10 23:19:36 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.7 2006/02/10 23:46:39 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_package_search.php,v 1.6 2006/02/10 23:19:36 lsces Exp $
+ * $Id: mod_package_search.php,v 1.7 2006/02/10 23:46:39 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
@@ -28,18 +28,7 @@
 	}
 	if ( empty($contentTypes) ) {
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
-/*			switch ($contentType["content_type_guid"]) {
-				case "bitarticle"  : $perm = "bit_p_read_article";		break;
-				case "bitpage"     : $perm = "bit_p_view";				break;
-				case "bitblogpost" : $perm = "bit_p_read_blog";	    	break;
-				case "bitcomment"  : $perm = "bit_p_read_comments";		break;
-				case "fisheyegallery" : $perm = "bit_p_view_fisheye";	break;
-				default            : $perm = "";	break;
-			}
-			$show = false; */
-//			if (!empty($perm) and $gBitUser->hasPermission($perm)) {
-			$contentTypes[$contentTypeX["content_type_guid"]] = $contentType["content_description"];
-//			}
+			$contentTypes[$contentType["content_type_guid"]] = $contentType["content_description"];
 		}
 		$gBitSmarty->assign( 'contentTypes', $contentTypes );
 	}
