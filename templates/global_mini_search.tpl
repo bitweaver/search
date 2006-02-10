@@ -4,7 +4,6 @@
 		<input id="fuser" name="highlight" size="20" type="text" accesskey="s" value="{tr}search{/tr}" onfocus="this.value=''" />
 		<br />
 		<select name="where">
-			<option value="pages">{tr}Entire Site{/tr}</option>
 			{html_options options=$contentTypes selected=$perms[user].level}
 		</select>
 	</div>

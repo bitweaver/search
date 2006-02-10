@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.11 2006/02/10 23:19:38 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.12 2006/02/10 23:53:39 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -18,6 +18,7 @@ $gBitSystem->verifyPackage( 'search' );
 
 /* contentType list created in mod_package_search.php at present
 if ( empty($contentTypes) ) {
+	$contentTypes = array( '' => 'All Content' );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
 	}

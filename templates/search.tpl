@@ -10,7 +10,6 @@
 				{formlabel label="Limit Search" for="where"}
 				{forminput}
 					<select name="where" id="where">
-						<option value="pages">{tr}Entire Site{/tr}</option>
 						{html_options options=$contentTypes }
 					</select>
 					{formhelp note="Limit search to the selected Liberty package"}
