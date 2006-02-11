@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.12 2006/02/10 23:53:39 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.13 2006/02/11 01:34:55 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -38,10 +38,12 @@ if ($gBitSystem->isFeatureActive("feature_search_stats")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
-$where = 'pages';
-if (isset($_REQUEST["where"])) {
-	$where = $_REQUEST["where"];
+$content_type_guid = 'pages';
+if (isset($_REQUEST["content_type_guid"])) {
+	$content_type_guid = $_REQUEST["content_type_guid"];
 }
+
+LibertyContent::prepGetList($_REQUEST);
 
 if( isset( $_REQUEST['usePart'] ) && $_REQUEST['usePart']=='on' ) {
 	$_REQUEST['usePart']=true;
@@ -50,27 +52,17 @@ if( isset( $_REQUEST['usePart'] ) && $_REQUEST['usePart']=='on' ) {
 }
 $gBitSmarty->assign('searchType', $_REQUEST['usePart'] ? "Using Partial Word Search" : "Using Exact Word Search");
 
-$offset = 0;
-if (isset($_REQUEST["offset"])) {
-	$offset = $_REQUEST["offset"];
-}
-if (isset($_REQUEST['list_page'])) {
-	$page = &$_REQUEST['list_page'];
-	$offset = ($page - 1) * $max_records;
-}
-
 // Build the query using words
-
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
 	$words = '';
 } else {
 	$words   = strip_tags($_REQUEST["words"]);
 }
 $gBitSmarty->assign('words', $words);
-$results = $searchlib->find($where, $words, $offset, $max_records, $_REQUEST["usePart"]);
+$results = $searchlib->find($content_type_guid, $words, $_REQUEST['offset'], $_REQUEST['max_records'], $_REQUEST["usePart"]);
 $cant    = $results['cant']; 
 
-switch ($where) {
+switch ($content_type_guid) {
 	case "bitarticle"  : $where2 = "Article";	break;
 	case "bitpage"     : $where2 = "Wiki Page";	break;
 	case "bitblogpost" : $where2 = "Blog Post";	break;
@@ -79,7 +71,7 @@ switch ($where) {
 }
 
 if ($cant <> 1) $where2 .= "s"; 
-$gBitSmarty->assign('where', $where);
+$gBitSmarty->assign('content_type_guid', $content_type_guid);
 $gBitSmarty->assign('where2', tra($where2));
 
 $stubContent = new LibertyContent();
@@ -100,9 +92,13 @@ if ( $cant > 0 ) {
 		}
 	}
 }
-LibertyContent::prepGetList($_REQUEST);
+// calculate page number
+$numPages = ceil( $cant / $gBitSystem->getPreference( 'max_records' ) );
+$gBitSmarty->assign( 'numPages', $numPages );
+
 $_REQUEST['cant'] = $cant;
 $_REQUEST['control']['parameters']['highlight'] = $_REQUEST["highlight"];
+$_REQUEST['control']['parameters']['content_type_guid'] = $content_type_guid;
 LibertyContent::postGetList( $_REQUEST );
 $gBitSmarty->assign_by_ref( 'listInfo', $_REQUEST["control"] );
 $gBitSmarty->assign('cant_results', $cant);
