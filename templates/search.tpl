@@ -7,11 +7,9 @@
 	<div class="body">
 		{form legend="Extended Search"}
 			<div class="row">
-				{formlabel label="Limit Search" for="where"}
+				{formlabel label="Limit Search" for="content_type_guid"}
 				{forminput}
-					<select name="where" id="where">
-						{html_options options=$contentTypes }
-					</select>
+					{html_options options=$contentTypes name=content_type_guid selected=`$content_type_guid` }
 					{formhelp note="Limit search to the selected Liberty package"}
 				{/forminput}
 			</div>
