@@ -67,7 +67,7 @@ if ($argc > 1) {
 
 $time_start = microtime_float();
 if (!$silent) echo "\nBeginning Reindex of $whatToIndex ...\n";
-if (!$silent) echo "Warning: unindexed only flag set. Will break MySQL 3.x because of sub-selects\n";
+if (!$silent && $unindexedOnly) echo "Warning: unindexed only flag set. Will break MySQL 3.x because of sub-selects\n";
 $count    = rebuild_index($whatToIndex, $unindexedOnly);
 $time_end = microtime_float();
 $time     = number_format($time_end - $time_start, 4);
