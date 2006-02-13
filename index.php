@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.13 2006/02/11 01:34:55 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.14 2006/02/13 10:06:17 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -34,7 +34,7 @@ if( !empty($_REQUEST["highlight"]) ) {
 	die;
 }
 
-if ($gBitSystem->isFeatureActive("feature_search_stats")) {
+if ($gBitSystem->isFeatureActive("stats_search")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
