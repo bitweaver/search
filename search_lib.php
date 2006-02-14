@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.16 2006/02/11 01:34:55 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.17 2006/02/14 21:53:26 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.16 2006/02/11 01:34:55 lsces Exp $
+ * $Id: search_lib.php,v 1.17 2006/02/14 21:53:26 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -174,7 +174,7 @@ class SearchLib extends BitBase {
 			$joinSql = '';
 			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
 			$bindVars = array_merge( $words, $allowed );
-			LibertyContent::getServicesSql( 'content_list_function', $selectSql, $joinSql, $whereSql, $bindVars );
+			LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
 
 			$query = "SELECT DISTINCT lc.`content_id`, lc.`title`, lc.`format_guid`, si.`content_type_guid`,
 							si.`last_update`, lc.`hits`, lc.`created`, lc.`last_modified`, lc.`data` $selectSql
