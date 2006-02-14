@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.17 2006/02/14 04:17:16 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.18 2006/02/14 19:03:17 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.17 2006/02/14 04:17:16 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.18 2006/02/14 19:03:17 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -60,6 +60,7 @@ function random_refresh_index($pContentType = "") {
  */
 
 function refresh_index( $pvContentId = 0 ) {
+	/*
 	global $gBitSystem;
 	if (is_object($pvContentId)) {  // InvokeService calls pass objects.
 		$contentId = $pvContentId->mContentId;
@@ -103,6 +104,7 @@ function refresh_index( $pvContentId = 0 ) {
 				insert_index($words, $contentGUID, $contentId);
 		}
 	}
+	*/
 }
 
 // Legacy index handlers - blogs (blog headers) are not in liberty_content yet
