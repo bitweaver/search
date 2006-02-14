@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.16 2006/02/09 11:00:34 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.17 2006/02/14 04:17:16 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.16 2006/02/09 11:00:34 lsces Exp $
+ * $Id: refresh_functions.php,v 1.17 2006/02/14 04:17:16 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -77,40 +77,31 @@ function refresh_index( $pvContentId = 0 ) {
 		$sql   = "SELECT `content_type_guid` FROM `" . BIT_DB_PREFIX . "liberty_content` WHERE `content_id` = " . $contentId;
 			$contentGUID = $gBitSystem->mDb->getOne($sql, array());
 		}
-		$auxField = '';
-		$auxJoin  = '';
+		$fields = "";
+		$joins  = "";
 		switch ($contentGUID) {
-			case BITCOMMENT_CONTENT_TYPE_GUID :
-				$auxTable = "";
-//				$auxTable = "liberty_comments";
-//				$auxField = ', t1.`description`';
-				break;
-			case BITBLOGPOST_CONTENT_TYPE_GUID :
-				$auxTable = "wiki_pages";
-				$auxField = ', t1.`description`';
-				break;
-			case BITBLOGPOST_CONTENT_TYPE_GUID :
-				$auxTable = "";
+			case BITPAGE_CONTENT_TYPE_GUID    :
+				$fields = ", t1.`description`";
+				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_pages` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
 			case BITARTICLE_CONTENT_TYPE_GUID :
-				$auxTable = "articles";
-				$auxField = ', t1.`description`, t1.`status_id`';
+				$fields = ", t1.`description`, t1.`status_id`";
+				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
 			default:
-				$auxTable = "";
 		}
-		if (!empty($auxTable)) {
-			$auxJoin  = ' INNER JOIN `' . BIT_DB_PREFIX . $auxTable . '` t1 ON lc.`content_id` = t1.`content_id`';
-		}
-		$query = "SELECT lc.`title`, lc.`data`, uu.`login`, uu.`real_name`" . $auxField . " " .
+		$query = "SELECT lc.`title`, lc.`data`, uu.`login`, uu.`real_name`" . $fields . " " .
 					"FROM `" . BIT_DB_PREFIX . "liberty_content` lc " .  
 					"INNER JOIN `" . BIT_DB_PREFIX . "users_users` uu ON uu.`user_id` = lc.`user_id`" .
-					$auxJoin . " WHERE lc.`content_id` = " . $contentId;
+					$joins . " WHERE lc.`content_id` = " . $contentId;
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
-		$words  = search_index($res["title"] . " " . $res["data"] . " " . $res["login"] . " " . $res["real_name"] . 
-		          (empty($pAuxTable) ? "" : " " . $res["description"]));
-		insert_index($words, $contentId);
+		if (($contentGUID <> BITARTICLE_CONTENT_TYPE_GUID) 
+			or ($contentGUID == BITARTICLE_CONTENT_TYPE_GUID and $res["status_id"] == ARTICLE_STATUS_APPROVED)) {
+				$words  = search_index($res["title"] . " " . $res["data"] . " " . $res["login"] . 
+						" " . $res["real_name"] . (empty($pAuxTable) ? "" : " " . $res["description"]));
+				insert_index($words, $contentGUID, $contentId);
+		}
 	}
 }
 
@@ -203,7 +194,7 @@ function delete_index_content_type($pContentType) {
 	global $gBitSystem;
 	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "searchindex`";
 	$array = array();
-	if ( !($pContentType == "pages") ) {
+	if ( $pContentType <> "pages" ) {
 		$sql  .= " WHERE `location`=?";
 		$array = array($pContentType);
 	}
@@ -211,18 +202,34 @@ function delete_index_content_type($pContentType) {
 
 }
 
-function rebuild_index($pContentType) {
+function rebuild_index($pContentType, $pUnindexedOnly = false) {
 	global $gBitSystem;
+	$whereClause = "";
 	ini_set("max_execution_time", "300");
-	delete_index_content_type($pContentType);
+	if (!$pUnindexedOnly) {
+		delete_index_content_type($pContentType);
+	}
 	$query  = "SELECT `content_id` FROM `" . BIT_DB_PREFIX . "liberty_content`";
-	if ( !($pContentType == "pages")) $query .= " WHERE `content_type_guid` = '" . $pContentType . "'";
-	$result = $gBitSystem->mDb->query($query);
+	if ( $pContentType <> "pages") {
+		$whereClause = " WHERE `content_type_guid` = '" . $pContentType . "'";
+	}
+	if ($pUnindexedOnly) {
+		if (empty($whereClause)) {
+			$whereClause = " WHERE ";
+		} else {
+			$whereClause .= " AND ";
+		}
+		$whereClause .= "`content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "searchindex`)" ;
+	}
+	$result = $gBitSystem->mDb->query($query . $whereClause);
+	$count  = 0;
 	if( $result ) {
+		$count  = $result->RecordCount();
 		while ($res = $result->fetchRow()) {
 			$contentId = $res["content_id"];
 			refresh_index($contentId);
 		}
 	}
+	return $count;
 }
 ?>
