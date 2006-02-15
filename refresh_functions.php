@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.17 2006/02/12 04:25:08 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.18 2006/02/15 02:20:27 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.17 2006/02/12 04:25:08 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.18 2006/02/15 02:20:27 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -42,11 +42,13 @@ function refresh_index( $pvContentId = 0 ) {
 		$fields = "";
 		$joins  = "";
 		switch ($contentGUID) {
-			case BITPAGE_CONTENT_TYPE_GUID    :
+			//case BITPAGE_CONTENT_TYPE_GUID    :
+			case "bitpage"    :
 				$fields = ", t1.`description`";
 				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_pages` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
-			case BITARTICLE_CONTENT_TYPE_GUID :
+			//case BITARTICLE_CONTENT_TYPE_GUID :
+			case "bitarticle" :
 				$fields = ", t1.`description`, t1.`status_id`";
 				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
@@ -58,8 +60,8 @@ function refresh_index( $pvContentId = 0 ) {
 				 $joins . " WHERE tc.`content_id` = " . $contentId;
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
-		if (($contentGUID <> BITARTICLE_CONTENT_TYPE_GUID) 
-			or ($contentGUID == BITARTICLE_CONTENT_TYPE_GUID and $res["status_id"] == ARTICLE_STATUS_APPROVED)) {
+		if (($contentGUID <> "bitarticle" ) //BITARTICLE_CONTENT_TYPE_GUID) 
+			or ($contentGUID == "bitarticle" and $res["status_id"] == 300)) {
 				$words  = search_index($res["title"] . " " . $res["data"] . " " . $res["login"] . 
 						" " . $res["real_name"] . (empty($pAuxTable) ? "" : " " . $res["description"]));
 				insert_index($words, $contentGUID, $contentId);
@@ -81,7 +83,8 @@ function refresh_index_blogs( $pBlogId = 0 ) {
 		$result = $gBitSystem->mDb->query($query, array());
 		$res    = $result->fetchRow();
 		$words  = search_index($res["title"]." ".$res["user"]." ".$res["real_name"]." ".$res["description"]);
-		insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogId);
+		//insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogId);
+		insert_index($words, "bitblog", $pBlogId);
 	}
 }
 // End Legacy Support
