@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.18 2006/02/15 02:20:27 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.19 2006/02/15 02:30:23 lphuberdeau Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.18 2006/02/15 02:20:27 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.19 2006/02/15 02:30:23 lphuberdeau Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -41,14 +41,14 @@ function refresh_index( $pvContentId = 0 ) {
 		}
 		$fields = "";
 		$joins  = "";
-		switch ($contentGUID) {
-			//case BITPAGE_CONTENT_TYPE_GUID    :
-			case "bitpage"    :
+		switch (true) {
+			case $gBitSystem->isPackageActive( 'wiki' ) 
+				&& $contentGUID == BITPAGE_CONTENT_TYPE_GUID    :
 				$fields = ", t1.`description`";
 				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_pages` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
-			//case BITARTICLE_CONTENT_TYPE_GUID :
-			case "bitarticle" :
+			case $gBitSystem->isPackageActive( 'articles' ) 
+				&& $contentGUID == BITARTICLE_CONTENT_TYPE_GUID    :
 				$fields = ", t1.`description`, t1.`status_id`";
 				$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` t1 ON tc.`content_id` = t1.`content_id`";
 				break;
