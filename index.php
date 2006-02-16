@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.14 2006/02/13 10:06:17 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.15 2006/02/16 13:48:12 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -88,7 +88,7 @@ if ( $cant > 0 ) {
 			$results['data'][$k]['title'] = $gBitSystem->mServerTimestamp->strftime( $date_format, $date_string, true );
 		}
 		if( !empty( $results['data'][$k]['data'] ) ) {
-			$results['data'][$k]['parsed'] = $stubContent->parseData( $results['data'][$k]['data'], $results['data'][$k]['format_guid'] );
+			$results['data'][$k]['parsed'] = $stubContent->parseData( $results['data'][$k] );
 		}
 	}
 }
