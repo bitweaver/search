@@ -1,7 +1,12 @@
 <?php
 global $gBitSystem, $gLibertySystem ;
 
-$gBitSystem->registerPackage( 'search', dirname( __FILE__).'/', TRUE, LIBERTY_SERVICE_SEARCH );
+$registerHash = array(
+	'package_name' => 'search',
+	'package_path' => dirname( __FILE__ ).'/',
+	'service' => LIBERTY_SERVICE_SEARCH,
+);
+$gBitSystem->registerPackage( $registerHash );
 
 if( $gBitSystem->isPackageActive( 'search' ) ) {
 	$gBitSystem->registerAppMenu( SEARCH_PKG_NAME, ucfirst( SEARCH_PKG_DIR ), SEARCH_PKG_URL.'index.php', '', 'search');
