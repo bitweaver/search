@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.17 2006/02/14 21:53:26 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.18 2006/02/19 10:09:47 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.17 2006/02/14 21:53:26 squareing Exp $
+ * $Id: search_lib.php,v 1.18 2006/02/19 10:09:47 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -29,12 +29,12 @@ class SearchLib extends BitBase {
 		$words = preg_split("/\s/", $words);
 		foreach ($words as $word) {
 			$word = trim($word);
-			$cant = $this->mDb->getOne("select count(*) from `" . BIT_DB_PREFIX . 
-				"search_stats` where `term`=?", array($word));
+			$cant = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . 
+				"search_stats` WHERE `term`=?", array($word));
 			if ($cant) {
-				$query = "update `" . BIT_DB_PREFIX . "search_stats` set `hits`= `hits` + 1 where `term`=?";
+				$query = "UPDATE `" . BIT_DB_PREFIX . "search_stats` SET `hits`= `hits` + 1 WHERE `term`=?";
 			} else {
-				$query = "insert into `" . BIT_DB_PREFIX . "search_stats` (`term`,`hits`) values (?,1)";
+				$query = "INSERT INTO `" . BIT_DB_PREFIX . "search_stats` (`term`,`hits`) VALUES (?,1)";
 			}
 			$result = $this->mDb->query($query,array($word));
 		}
@@ -108,21 +108,21 @@ class SearchLib extends BitBase {
 		if (!isset($search_max_syllwords)) {
 			$search_max_syllwords = 100;
 		}
-		$query  = "select `searchword`, sum(`count`) as `cnt` from `" . BIT_DB_PREFIX . 
-					"searchindex` where `searchword` like ? group by `searchword` ORDER BY 2 desc";
+		$query  = "SELECT `searchword`, SUM(`i_count`) AS `cnt` FROM `" . BIT_DB_PREFIX . 
+					"searchindex` WHERE `searchword` LIKE ? GROUP BY `searchword` ORDER BY 2 desc";
 		$result = $this->mDb->query($query, array('%' . $syllable . '%'), $search_max_syllwords); // search_max_syllwords: how many different searchwords that contain the syllable are taken into account?. Sortet by number of occurences.
 		while ($res = $result->fetchRow()) {
 			$ret[] = $res["searchword"];
 		}
 		// cache this long running query
 		foreach($ret as $searchword) {
-			$this->mDb->query("insert into `" . BIT_DB_PREFIX . 
-				"searchwords` (`syllable`,`searchword`) values (?,?)",
+			$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX . 
+				"searchwords` (`syllable`,`searchword`) VALUES (?,?)",
 				array($syllable, $searchword), -1, -1);
 			}
 		// set lru list parameters
 		$now = time();
-		$this->mDb->query("insert into `" . BIT_DB_PREFIX . 
+		$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX . 
 			"searchsyllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
 			array($syllable,(int) $now,(int) $now));
 
@@ -132,7 +132,7 @@ class SearchLib extends BitBase {
 		list($usec, $sec) = explode(" ", microtime());
 		srand (ceil($sec + 100 * $usec));
 		if(rand(1, $search_lru_purge_rate) == 1) {
-			$lrulength = $this->mDb->getOne("select count(*) from `" . BIT_DB_PREFIX . 
+			$lrulength = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . 
 				"searchsyllable`", array());
 			if ($lrulength > $search_lru_length) { // only purge if lru list is too long.
 				//purge oldest

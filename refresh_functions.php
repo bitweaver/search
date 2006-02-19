@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.18 2006/02/14 19:03:17 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.19 2006/02/19 10:09:47 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.18 2006/02/14 19:03:17 squareing Exp $
+ * $Id: refresh_functions.php,v 1.19 2006/02/19 10:09:47 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -115,9 +115,9 @@ function random_refresh_index_blogs() {
 	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
 		// get random blog
-		$cant = $gBitSystem->mDb->getOne("select count(*) from `".BIT_DB_PREFIX."blogs`", array());
+		$cant = $gBitSystem->mDb->getOne("SELECT COUNT(*) FROM `".BIT_DB_PREFIX."blogs`", array());
 		if($cant > 0) {
-			$query  = "select `blog_id` from `" . BIT_DB_PREFIX . "blogs`";
+			$query  = "SELECT `blog_id` FROM `" . BIT_DB_PREFIX . "blogs`";
 			$blogId = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
 			refresh_index_blogs($blogId);
 		}
@@ -128,7 +128,7 @@ function refresh_index_blogs( $pBlogId = 0 ) {
 	global $gBitSystem;
 	if( $pBlogId > 0 and $gBitSystem->isPackageActive( 'blogs' ) ) {
 		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
-		$query = "SELECT b.`title`, b.`description`, uu.`login` as `user`, uu.`real_name`
+		$query = "SELECT b.`title`, b.`description`, uu.`login` AS `user`, uu.`real_name`
 					FROM `".BIT_DB_PREFIX."blogs` b
 					INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = b.`user_id`
 					WHERE `blog_id` = " . $pBlogId;
@@ -179,7 +179,7 @@ function insert_index( &$words, $pContentId ) {
 			if (strlen($key) >= $gBitSystem->getPreference( 'search_min_wordlength') ) {
 				// todo: stopwords
 				$query = "INSERT INTO `" . BIT_DB_PREFIX . "searchindex`
-					(`content_id`,`searchword`,`count`,`last_update`) values (?,?,?,?)";
+					(`content_id`,`searchword`,`i_count`,`last_update`) values (?,?,?,?)";
 				$gBitSystem->mDb->query($query, array($pContentId, $key, (int) $value, $now));
 			}
 		}

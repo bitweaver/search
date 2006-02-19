@@ -5,7 +5,7 @@ $tables = array(
 'searchindex' => "
 	searchword C(80) PRIMARY,
 	content_id I4 PRIMARY,
-	count I4 NOTNULL DEFAULT '1',
+	i_count I4 NOTNULL DEFAULT '1',
 	last_update I4 NOTNULL
 ",
 
