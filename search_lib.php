@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.12 2006/02/08 04:26:35 mej Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.1.1.1.2.13 2006/02/19 03:41:10 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.1.1.1.2.12 2006/02/08 04:26:35 mej Exp $
+ * $Id: search_lib.php,v 1.1.1.1.2.13 2006/02/19 03:41:10 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -157,7 +157,7 @@ class SearchLib extends BitBase {
 	}
 
 	function find_exact_generic($where, $words, $offset, $maxRecords) {
-		global $gPage, $gBitSystem, $gLibertySystem;
+		global $gPage, $gBitSystem, $gLibertySystem, $gBitDbType;
 		$allowed = array();
 		$ret    = array();
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
@@ -167,11 +167,13 @@ class SearchLib extends BitBase {
 			}
 		}
 		if (count($allowed) > 0) {
+			// Putting in the below hack because mssql cannot select distinct on a text blob column.
+			$dbFieldHack    = $gBitDbType == 'mssql' ? " CAST(tc.`data` AS VARCHAR(250)) as `data` " : " tc.`data` ";
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 			$qPlaceHolders2 = implode(',', array_fill(0, count($allowed), '?'));
 			$query = "SELECT DISTINCT tc.`content_id`, tc.`title`, tc.`format_guid`, si.`location`,
-							si.`last_update`, tc.`hits`, tc.`created`, tc.`last_modified`, tc.`data`
-						FROM `" . BIT_DB_PREFIX . "tiki_searchindex` si 
+							si.`last_update`, tc.`hits`, tc.`created`, tc.`last_modified`, " . $dbFieldHack .
+						" FROM `" . BIT_DB_PREFIX . "tiki_searchindex` si 
 			  			INNER JOIN `" . BIT_DB_PREFIX . "tiki_content` tc ON tc.`content_id` = si.`content_id`
 			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
 			  		 	AND  si.`location` IN (" . $qPlaceHolders2 . ") ORDER BY `hits` desc";
