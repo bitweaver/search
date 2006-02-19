@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.20 2006/02/15 02:43:06 mej Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.1.1.1.2.21 2006/02/19 03:46:10 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.1.1.1.2.20 2006/02/15 02:43:06 mej Exp $
+ * $Id: refresh_functions.php,v 1.1.1.1.2.21 2006/02/19 03:46:10 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -23,42 +23,22 @@
  * This currently works for wiki pages, blog posts and articles.
  */
 
-function refresh_index( $pvContentId = 0 ) {
+function refresh_index( $pContentObject = null ) {
 	global $gBitSystem;
-	if (is_object($pvContentId)) {  // InvokeService calls pass objects.
-		$contentId   = $pvContentId->mContentId;
-		$contentGUID = $pvContentId->mContentTypeGuid;
-	} else {
-		$contentId = $pvContentId;
-		$contentGUID = "";
-	}
-
-	// This are for the constants. The defines need to be moved from bitblog to bit_setup_inc ... 
-	if ($contentId > 0) {
-		if (empty($contentGUID)) {
-			$sql = "SELECT `content_type_guid` FROM `" . BIT_DB_PREFIX . "tiki_content` WHERE `content_id` = " . $contentId;
-			$contentGUID = $gBitSystem->mDb->getOne($sql, array());
+	if (is_object($pContentObject)) {
+		if (!isset($pContentObject->mInfo["index_data"]) and method_exists($pContentObject, 'setIndexData')) {
+			$pContentObject->setIndexData() ;
 		}
-		$fields = "";
-		$joins  = "";
-        if ($gBitSystem->isPackageActive( 'wiki' ) && $contentGUID == BITPAGE_CONTENT_TYPE_GUID) {
-			$fields = ", t1.`description`";
-			$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_pages` t1 ON tc.`content_id` = t1.`content_id`";
-        } else if ($gBitSystem->isPackageActive( 'articles' ) && $contentGUID == BITARTICLE_CONTENT_TYPE_GUID) {
-			$fields = ", t1.`description`, t1.`status_id`";
-			$joins  = " INNER JOIN `" . BIT_DB_PREFIX . "tiki_articles` t1 ON tc.`content_id` = t1.`content_id`";
-		}
-		$query = "SELECT tc.`title`, tc.`data`, uu.`login`, uu.`real_name` " . $fields . " " .
-				 "FROM `" . BIT_DB_PREFIX . "tiki_content` tc " .  
-				 "INNER JOIN `" . BIT_DB_PREFIX . "users_users` uu ON uu.`user_id` = tc.`user_id`" .
-				 $joins . " WHERE tc.`content_id` = " . $contentId;
-		$result = $gBitSystem->mDb->query($query, array());
-		$res    = $result->fetchRow();
-		if (($contentGUID <> "bitarticle" ) //BITARTICLE_CONTENT_TYPE_GUID) 
-			or ($contentGUID == "bitarticle" and $res["status_id"] == 300)) {
-				$words  = search_index($res["title"] . " " . $res["data"] . " " . $res["login"] . 
-						" " . $res["real_name"] . (empty($pAuxTable) ? "" : " " . $res["description"]));
-				insert_index($words, $contentGUID, $contentId);
+		if (isset($pContentObject->mInfo["index_data"]) and isset($pContentObject->mContentId)) {
+			if (isset($pContentObject->mType["content_type_guid"])) {
+				$contentTypeGuid = $pContentObject->mType["content_type_guid"];
+			} elseif (isset($pContentObject->mContentTypeGuid)) {
+				$contentTypeGuid = $pContentObject->mContentTypeGuid;
+			}
+			if (isset($contentTypeGuid)) {
+				$words = prepare_words($pContentObject->mInfo["index_data"]);
+				insert_index($words, $contentTypeGuid, $pContentObject->mContentId);
+			}
 		}
 	}
 }
@@ -73,18 +53,16 @@ function refresh_index_blogs( $pBlogId = 0 ) {
 		$query = "SELECT tb.`title`, tb.`description`, uu.`login` as `user`, uu.`real_name`
 					FROM `".BIT_DB_PREFIX."tiki_blogs` tb
 					INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = tb.`user_id`
-					WHERE `blog_id` = " . $pBlogId;
-		$result = $gBitSystem->mDb->query($query, array());
-		$res    = $result->fetchRow();
-		$words  = search_index($res["title"]." ".$res["user"]." ".$res["real_name"]." ".$res["description"]);
-		//insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogId);
-		insert_index($words, "bitblog", $pBlogId);
+					WHERE `blog_id` = ?";
+		$res   = $gBitSystem->mDb->getRow($query, array($pBlogId));
+		$words = prepare_words($res["title"]." ".$res["user"]." ".$res["real_name"]." ".$res["description"]);
+		insert_index($words, BITBLOG_CONTENT_TYPE_GUID, $pBlogId);
 	}
 }
 // End Legacy Support
 
 
-function search_index($data) {
+function prepare_words($data) {
 	$data = strip_tags($data);
 	// split into words
 	$sstrings = preg_split("/[\W]+/", $data, -1, PREG_SPLIT_NO_EMPTY);
@@ -114,7 +92,7 @@ function insert_index( &$words, $location, $pContentId ) {
 		$now = $gBitSystem->getUTCTime();
 		foreach ($words as $key=>$value) {
 			if (strlen($key) >= $gBitSystem->mPrefs["search_min_wordlength"]) {
-				// todo: stopwords
+				// todo: stopwords + common words.
 				$query = "INSERT INTO `" . BIT_DB_PREFIX . "tiki_searchindex`
 					(`location`,`content_id`,`searchword`,`count`,`last_update`) values (?,?,?,?,?)";
 				$gBitSystem->mDb->query($query, array($location, $pContentId, $key, (int) $value, $now));
@@ -141,15 +119,17 @@ function delete_index_content_type($pContentType) {
 }
 
 function rebuild_index($pContentType, $pUnindexedOnly = false) {
-	global $gBitSystem;
+	global $gBitSystem, $gLibertySystem;
+	$arguments   = array();
 	$whereClause = "";
 	ini_set("max_execution_time", "300");
 	if (!$pUnindexedOnly) {
 		delete_index_content_type($pContentType);
 	}
-	$query  = "SELECT `content_id` FROM `" . BIT_DB_PREFIX . "tiki_content`";
-	if ( $pContentType <> "pages") {
-		$whereClause = " WHERE `content_type_guid` = '" . $pContentType . "'";
+	$query  = "SELECT `content_id`, `content_type_guid` FROM `" . BIT_DB_PREFIX . "tiki_content` " ; 
+	if ($pContentType <> "pages") {
+		$whereClause = " WHERE `content_type_guid` = ?";
+		$arguments[] = $pContentType;
 	}
 	if ($pUnindexedOnly) {
 		if (empty($whereClause)) {
@@ -157,15 +137,22 @@ function rebuild_index($pContentType, $pUnindexedOnly = false) {
 		} else {
 			$whereClause .= " AND ";
 		}
-		$whereClause .= "`content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "tiki_searchindex`)" ;
+		$whereClause .= " `content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "tiki_searchindex`)" ;
 	}
-	$result = $gBitSystem->mDb->query($query . $whereClause);
-	$count  = 0;
+	$orderBy = " ORDER BY `content_type_guid` ";
+	$result  = $gBitSystem->mDb->query($query . $whereClause . $orderBy, $arguments);
+	$count   = 0;
 	if( $result ) {
-		$count  = $result->RecordCount();
+		$count   = $result->RecordCount();
 		while ($res = $result->fetchRow()) {
-			$contentId = $res["content_id"];
-			refresh_index($contentId);
+			if( isset( $gLibertySystem->mContentTypes[$res["content_type_guid"]] ) ) {
+				$type = $gLibertySystem->mContentTypes[$res["content_type_guid"]];
+				require_once( constant( strtoupper( $type['handler_package'] ).'_PKG_PATH' ).$type['handler_file'] );
+				$obj = new $type['handler_class']( NULL, $res["content_id"] );
+				//$obj->setIndexData();
+				refresh_index($obj);
+				unset($obj);
+			}
 		}
 	}
 	return $count;
