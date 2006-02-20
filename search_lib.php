@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.18 2006/02/19 10:09:47 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.19 2006/02/20 04:56:08 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.18 2006/02/19 10:09:47 lsces Exp $
+ * $Id: search_lib.php,v 1.19 2006/02/20 04:56:08 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -17,6 +17,7 @@
  * @package search
  * @subpackage SearchLib
  */
+
 class SearchLib extends BitBase {
 	function SearchLib() {
 		BitBase::BitBase();
@@ -156,18 +157,19 @@ class SearchLib extends BitBase {
 	}
 
 	function find_exact_generic($where, $words, $offset, $max_records) {
-		global $gPage, $gBitSystem, $gLibertySystem;
+		global $gPage, $gBitSystem, $gLibertySystem, $gBitDbType;
 		$allowed = array();
 		$ret    = array();
-
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
-			if (($where == $contentType["content_type_guid"] or $where == "") 
+			if (($where == $contentType["content_type_guid"] or $where == "") // pages ?
 			and $this->has_permission($contentType["content_type_guid"])) {
 				$allowed[] = $contentType["content_type_guid"];
 			}
 		}
 
 		if (count($allowed) > 0) {
+			// Putting in the below hack because mssql cannot select distinct on a text blob column.
+			// $dbFieldHack    = $gBitDbType == 'mssql' ? " CAST(tc.`data` AS VARCHAR(250)) as `data` " : " tc.`data` ";
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 
 			$selectSql = '';

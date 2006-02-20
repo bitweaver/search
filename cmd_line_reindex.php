@@ -48,34 +48,38 @@ require_once( SEARCH_PKG_PATH.'refresh_functions.php');
 $whatToIndex   = "pages";
 $unindexedOnly = false;
 $silent        = false;
-if ($argc > 1) {
-	for ($i = 1; $i < $argc; $i++) {
-		$arg = strtolower($argv[$i]);
-		switch ($arg) {
-			case "silent" :
-				$silent = true;
-				break;
-			case "unindexedonly" :
-				$unindexedOnly = true; // only index content that hasn't been indexed yet
-				break;
-			default :
-				$whatToIndex = $arg;
-				break;
+if (isset($argc)) {  // we are running from the command line.
+	if ($argc > 1) {
+		for ($i = 1; $i < $argc; $i++) {
+			$arg = strtolower($argv[$i]);
+			switch ($arg) {
+				case "silent" :
+					$silent = true;
+					break;
+				case "unindexedonly" :
+					$unindexedOnly = true; // only index content that hasn't been indexed yet
+					break;
+				default :
+					$whatToIndex = $arg;
+					break;
+			}
 		}
+		$time_start = microtime_float();
+		if (!$silent) echo "\nBeginning Reindex of $whatToIndex ...\n";
+		if (!$silent && $unindexedOnly) echo "Warning: unindexed only flag set. Will break MySQL 3.x because of sub-selects\n";
+		$count    = rebuild_index($whatToIndex, $unindexedOnly);
+		$time_end = microtime_float();
+		$time     = number_format($time_end - $time_start, 4);
+		if (!$silent) echo "Index rebuild complete.\n";
+		if (!$silent) echo "Attempted to index $count pieces of content\n";
+		if (!$silent) echo "(Note: Some content may not be indexable. This is normal)\n";
+		if (!$silent) echo "Execution time: $time seconds\n";
+		die();
 	}
+} else {
+		// Don't allow this to be run from the web.
+		header("location: ../index.php" );
 }
-
-$time_start = microtime_float();
-if (!$silent) echo "\nBeginning Reindex of $whatToIndex ...\n";
-if (!$silent && $unindexedOnly) echo "Warning: unindexed only flag set. Will break MySQL 3.x because of sub-selects\n";
-$count    = rebuild_index($whatToIndex, $unindexedOnly);
-$time_end = microtime_float();
-$time     = number_format($time_end - $time_start, 4);
-if (!$silent) echo "Index rebuild complete.\n";
-if (!$silent) echo "Attempted to index $count pieces of content\n";
-if (!$silent) echo "(Note: Some content may not be indexable. This is normal)\n";
-if (!$silent) echo "Execution time: $time seconds\n";
-die();
 
 function microtime_float() {
    list($usec, $sec) = explode(" ", microtime());
