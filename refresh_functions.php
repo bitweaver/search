@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.22 2006/02/24 20:09:57 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.23 2006/02/24 23:14:23 seannerd Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.22 2006/02/24 20:09:57 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.23 2006/02/24 23:14:23 seannerd Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -169,7 +169,8 @@ function delete_index_content_type($pContentType) {
 	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "searchindex`";
 	$array = array();
 	if ( $pContentType <> "pages" ) {
-		$sql  .= " WHERE `location`=?";
+		$sql  .= " WHERE `content_id` IN (SELECT content_id FROM `" . BIT_DB_PREFIX . 
+				 "liberty_content` where `content_type_guid` = ?)";
 		$array = array($pContentType);
 	}
 	$gBitSystem->mDb->query( $sql, $array );
