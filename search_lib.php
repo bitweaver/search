@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.20 2006/02/26 20:37:41 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.21 2006/02/27 21:55:19 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.20 2006/02/26 20:37:41 seannerd Exp $
+ * $Id: search_lib.php,v 1.21 2006/02/27 21:55:19 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -169,17 +169,16 @@ class SearchLib extends BitBase {
 
 		if (count($allowed) > 0) {
 			// Putting in the below hack because mssql cannot select distinct on a text blob column.
-			$dbFieldHack    = $gBitDbType == 'mssql' ? " CAST(lc.`data` AS VARCHAR(250)) as `data` " : " lc.`data` ";
+			$selectSql = $gBitDbType == 'mssql' ? " ,CAST(lc.`data` AS VARCHAR(250)) as `data` " : " ,lc.`data` ";
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 
-			$selectSql = '';
 			$joinSql = '';
 			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
 			$bindVars = array_merge( $words, $allowed );
 			LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
 
 			$query = "SELECT DISTINCT lc.`content_id`, lc.`title`, lc.`format_guid`, lc.`content_type_guid`,
-							si.`last_update`, lc.`hits`, lc.`created`, lc.`last_modified`, $dbFieldHack $selectSql
+							si.`last_update`, lc.`hits`, lc.`created`, lc.`last_modified` $selectSql
 						FROM `" . BIT_DB_PREFIX . "searchindex` si 
 			  			INNER JOIN `" . BIT_DB_PREFIX . "liberty_content` lc ON lc.`content_id` = si.`content_id` $joinSql 
 			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
