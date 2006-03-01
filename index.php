@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.15 2006/02/16 13:48:12 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.16 2006/03/01 20:16:28 spiderr Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -93,7 +93,7 @@ if ( $cant > 0 ) {
 	}
 }
 // calculate page number
-$numPages = ceil( $cant / $gBitSystem->getPreference( 'max_records' ) );
+$numPages = ceil( $cant / $gBitSystem->getConfig( 'max_records' ) );
 $gBitSmarty->assign( 'numPages', $numPages );
 
 $_REQUEST['cant'] = $cant;

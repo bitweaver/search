@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.24 2006/02/24 23:15:16 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.25 2006/03/01 20:16:28 spiderr Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.24 2006/02/24 23:15:16 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.25 2006/03/01 20:16:28 spiderr Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -148,7 +148,7 @@ function insert_index( &$words, $location, $pContentId ) {
 		delete_index($pContentId);
 		$now = $gBitSystem->getUTCTime();
 		foreach ($words as $key=>$value) {
-			if (strlen($key) >= $gBitSystem->getPreference( 'search_min_wordlength') ) {
+			if (strlen($key) >= $gBitSystem->getConfig( 'search_min_wordlength') ) {
 				// todo: stopwords + common words.
 				$query = "INSERT INTO `" . BIT_DB_PREFIX . "searchindex`
 					(`content_id`,`searchword`,`i_count`,`last_update`) values (?,?,?,?)";
