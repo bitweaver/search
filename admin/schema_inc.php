@@ -2,20 +2,20 @@
 
 $tables = array(
 
-'searchindex' => "
+'search_index' => "
 	searchword C(80) PRIMARY,
 	content_id I4 PRIMARY,
 	i_count I4 NOTNULL DEFAULT '1',
 	last_update I4 NOTNULL
 ",
 
-'searchsyllable' => "
+'search_syllable' => "
 	syllable C(80) PRIMARY,
 	last_used I4 NOTNULL,
 	last_updated I4 NOTNULL
 ",
 
-'searchwords' => "
+'search_words' => "
 	syllable C(80) KEY,
 	searchword C(80) KEY
 ",

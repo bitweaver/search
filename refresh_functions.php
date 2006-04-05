@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.26 2006/03/17 05:45:54 seannerd Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.27 2006/04/05 13:30:34 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.26 2006/03/17 05:45:54 seannerd Exp $
+ * $Id: refresh_functions.php,v 1.27 2006/04/05 13:30:34 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -113,7 +113,7 @@ function refresh_index_blogs( $pBlogId = 0 ) {
 function refresh_index_oldest(){
 	global $gBitSystem;
 	$contentId = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
-				"searchindex` ORDER BY `last_update`", array());
+				"search_index` ORDER BY `last_update`", array());
 	if ( isset($contentId) ) {
 		refresh_index($contentId);
 	}
@@ -137,7 +137,7 @@ function prepare_words($data) {
 function delete_index ($pContentId) {
 	global $gBitSystem;
 	if( !empty( $pContentId ) ) {
-		$sql = "DELETE FROM `".BIT_DB_PREFIX."searchindex` WHERE `content_id`=?";
+		$sql = "DELETE FROM `".BIT_DB_PREFIX."search_index` WHERE `content_id`=?";
 		$gBitSystem->mDb->query($sql, array($pContentId));
 	}
 }
@@ -150,7 +150,7 @@ function insert_index( &$words, $location, $pContentId ) {
 		foreach ($words as $key=>$value) {
 			if (strlen($key) >= $gBitSystem->getConfig( 'search_min_wordlength') ) {
 				// todo: stopwords + common words.
-				$query = "INSERT INTO `" . BIT_DB_PREFIX . "searchindex`
+				$query = "INSERT INTO `" . BIT_DB_PREFIX . "search_index`
 					(`content_id`,`searchword`,`i_count`,`last_update`) values (?,?,?,?)";
 				$gBitSystem->mDb->query($query, array($pContentId, $key, (int) $value, $now));
 			} // What happened to location?
@@ -160,13 +160,13 @@ function insert_index( &$words, $location, $pContentId ) {
 
 function delete_search_words_and_syllables() {
 	global $gBitSystem;
-	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "searchwords`", array() );
-	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "searchsyllable`", array() );
+	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "search_words`", array() );
+	$gBitSystem->mDb->query( "DELETE FROM `" . BIT_DB_PREFIX . "search_syllable`", array() );
 }
 
 function delete_index_content_type($pContentType) {
 	global $gBitSystem;
-	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "searchindex`";
+	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "search_index`";
 	$array = array();
 	if ( $pContentType <> "pages" ) {
 		$sql  .= " WHERE `content_id` IN (SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
@@ -195,7 +195,7 @@ function rebuild_index($pContentType, $pUnindexedOnly = false) {
 		} else {
 			$whereClause .= " AND ";
 		}
-		$whereClause .= "`content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "searchindex`)" ;
+		$whereClause .= "`content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "search_index`)" ;
 	}
 	$orderBy = " ORDER BY `content_type_guid` ";
 	$result = $gBitSystem->mDb->query($query . $whereClause . $orderBy, $arguments);
