@@ -35,10 +35,10 @@ foreach( array_keys( $tables ) AS $tableName ) {
 }
 
 $indices = array (
-	'searchidx_last_update_idx' => array( 'table' => 'searchindex', 'cols' => 'last_update', 'opts' => NULL ),
-	'searchidx_word_idx' => array( 'table' => 'searchindex', 'cols' => 'searchword', 'opts' => NULL ),
-	'searchidx_con_idx' => array( 'table' => 'searchindex', 'cols' => 'content_id', 'opts' => NULL ),
-	'searchsyl_last_used_idx' => array( 'table' => 'searchsyllable', 'cols' => 'last_used', 'opts' => NULL )
+	'searchidx_last_update_idx' => array( 'table' => 'search_index', 'cols' => 'last_update', 'opts' => NULL ),
+	'searchidx_word_idx' => array( 'table' => 'search_index', 'cols' => 'searchword', 'opts' => NULL ),
+	'searchidx_con_idx' => array( 'table' => 'search_index', 'cols' => 'content_id', 'opts' => NULL ),
+	'searchsyl_last_used_idx' => array( 'table' => 'search_syllable', 'cols' => 'last_used', 'opts' => NULL )
 );
 
 $gBitInstaller->registerSchemaIndexes( SEARCH_PKG_NAME, $indices );
