@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.22 2006/04/05 13:30:34 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.23 2006/04/11 13:08:40 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.22 2006/04/05 13:30:34 squareing Exp $
+ * $Id: search_lib.php,v 1.23 2006/04/11 13:08:40 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -203,11 +203,11 @@ class SearchLib extends BitBase {
 		global $gBitUser;
 		$ret = false;
 		switch ($pContentType) {
-			case "bitarticle"     : $perm = "bit_p_read_article";	break;
-			case "bitpage"        : $perm = "bit_p_view";			break;
-			case "bitblogpost"    : $perm = "bit_p_read_blog";	    break;
-			case "bitcomment"     : $perm = "bit_p_read_comments";	break;
-			case "fisheyegallery" : $perm = "bit_p_view_fisheye";	break;
+			case "bitarticle"     : $perm = "p_articles_read";	break;
+			case "bitpage"        : $perm = "p_wiki_view_page";			break;
+			case "bitblogpost"    : $perm = "p_blogs_view";	    break;
+			case "bitcomment"     : $perm = "p_liberty_read_comments";	break;
+			case "fisheyegallery" : $perm = "p_fisheye_view";	break;
 			default               : $perm = "";						break;
 		}
 		return $gBitUser->hasPermission($perm);
