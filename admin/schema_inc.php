@@ -46,9 +46,6 @@ $gBitInstaller->registerSchemaIndexes( SEARCH_PKG_NAME, $indices );
 $gBitInstaller->registerPackageInfo( SEARCH_PKG_NAME, array(
 	'description' => "This package makes any content on your site searchable.",
 	'license' => '<a href="http://www.gnu.org/licenses/licenses.html#LGPL">LGPL</a>',
-	'version' => '0.2',
-	'state' => 'alpha',
-	'dependencies' => '',
 ) );
 
 // ### Default Preferences
