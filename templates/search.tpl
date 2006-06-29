@@ -40,7 +40,7 @@
 			{* using capture for no particular reason appart from a nicer layout - xing *}
 			{capture name=title}
 				{assign var=guid value=$results[search].content_type_guid}
-				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title|escape}</a>
+				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title}</a>
 				<small> &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
 					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}
 						&nbsp;&bull;&nbsp;
@@ -57,7 +57,7 @@
 			{/capture}
 
 			<div class="search box">
-				<h3>{$smarty.capture.title|escape}</h3>
+				<h3>{$smarty.capture.title}</h3>
 				<div class="boxcontent">
 					{$results[search].parsed|strip_tags|truncate:250}
 					<br />
