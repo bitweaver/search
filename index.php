@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.6 2006/02/08 05:20:21 mej Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.2.2.7 2006/06/29 21:35:48 windblown Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -29,7 +29,7 @@ if( !empty($_REQUEST["highlight"]) ) {
   $_REQUEST["words"]=$_REQUEST["highlight"];
 } else {
 	// a nice big, groovy search will be cool to have one day...
-	$gBitSystem->display( 'bitpackage:search/search.tpl');
+	$gBitSystem->display( 'bitpackage:search/search.tpl', 'Search');
 	die;
 }
 
@@ -113,6 +113,6 @@ $gBitSmarty->assign('partialOnOff', $partialOnOff);
 $gBitSmarty->assign_by_ref('results', $results["data"]);
 
 // Display the template
-$gBitSystem->display( 'bitpackage:search/search.tpl');
+$gBitSystem->display( 'bitpackage:search/search.tpl', 'Search Results for: '.strip_tags($_REQUEST["highlight"]));
 
 ?>
