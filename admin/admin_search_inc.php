@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.10 2006/04/17 07:28:26 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.11 2006/08/18 11:10:31 sylvieg Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -74,5 +74,12 @@ foreach( $formSearchInts as $item => $data ) {
 $gBitSmarty->assign( 'formSearchToggles',$formSearchToggles );
 $gBitSmarty->assign( 'formSearchInts',$formSearchInts );
 
-
+/* usually done in mod_package_search.php - but the module can be not here the first time */
+if ( empty($contentTypes) ) {
+	$contentTypes = array( '' => 'All Content' );
+	foreach( $gLibertySystem->mContentTypes as $cType ) {
+		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+	}
+	$gBitSmarty->assign( 'contentTypes', $contentTypes );
+}
 ?>
