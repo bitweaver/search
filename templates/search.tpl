@@ -41,7 +41,7 @@
 			{capture name=title}
 				{assign var=guid value=$results[search].content_type_guid}
 				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title}</a>
-				<small> &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
+				<small>&bull;&nbsp;{tr}Relivence{/tr}: {$results[search].relivency} &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
 					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}
 						&nbsp;&bull;&nbsp;
 						{if $results[search].relevance <= 0}

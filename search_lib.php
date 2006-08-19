@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.23 2006/04/11 13:08:40 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.24 2006/08/19 17:01:08 hash9 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,11 +8,11 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.23 2006/04/11 13:08:40 squareing Exp $
+ * $Id: search_lib.php,v 1.24 2006/08/19 17:01:08 hash9 Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
- 
+
 /**
  * @package search
  * @subpackage SearchLib
@@ -30,7 +30,7 @@ class SearchLib extends BitBase {
 		$words = preg_split("/\s/", $words);
 		foreach ($words as $word) {
 			$word = trim($word);
-			$cant = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . 
+			$cant = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX .
 				"search_stats` WHERE `term`=?", array($word));
 			if ($cant) {
 				$query = "UPDATE `" . BIT_DB_PREFIX . "search_stats` SET `hits`= `hits` + 1 WHERE `term`=?";
@@ -109,7 +109,7 @@ class SearchLib extends BitBase {
 		if (!isset($search_max_syllwords)) {
 			$search_max_syllwords = 100;
 		}
-		$query  = "SELECT `searchword`, SUM(`i_count`) AS `cnt` FROM `" . BIT_DB_PREFIX . 
+		$query  = "SELECT `searchword`, SUM(`i_count`) AS `cnt` FROM `" . BIT_DB_PREFIX .
 					"search_index` WHERE `searchword` LIKE ? GROUP BY `searchword` ORDER BY 2 desc";
 		$result = $this->mDb->query($query, array('%' . $syllable . '%'), $search_max_syllwords); // search_max_syllwords: how many different search_words that contain the syllable are taken into account?. Sortet by number of occurences.
 		while ($res = $result->fetchRow()) {
@@ -117,13 +117,13 @@ class SearchLib extends BitBase {
 		}
 		// cache this long running query
 		foreach($ret as $searchword) {
-			$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX . 
+			$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX .
 				"search_words` (`syllable`,`searchword`) VALUES (?,?)",
 				array($syllable, $searchword), -1, -1);
 			}
 		// set lru list parameters
 		$now = time();
-		$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX . 
+		$this->mDb->query("INSERT INTO `" . BIT_DB_PREFIX .
 			"search_syllable`(`syllable`,`last_used`,`last_updated`) values (?,?,?)",
 			array($syllable,(int) $now,(int) $now));
 
@@ -133,7 +133,7 @@ class SearchLib extends BitBase {
 		list($usec, $sec) = explode(" ", microtime());
 		srand (ceil($sec + 100 * $usec));
 		if(rand(1, $search_lru_purge_rate) == 1) {
-			$lrulength = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX . 
+			$lrulength = $this->mDb->getOne("SELECT COUNT(*) FROM `" . BIT_DB_PREFIX .
 				"search_syllable`", array());
 			if ($lrulength > $search_lru_length) { // only purge if lru list is too long.
 				//purge oldest
@@ -145,9 +145,9 @@ class SearchLib extends BitBase {
 					$oldwords[]=$res["syllable"];
 				}
 				foreach($oldwords as $oldword) {
-					$this->mDb->query("delete from `" . BIT_DB_PREFIX . 
+					$this->mDb->query("delete from `" . BIT_DB_PREFIX .
 						"search_words`    where `syllable`=?", array($oldword), -1, -1);
-					$this->mDb->query("delete from `" . BIT_DB_PREFIX . 
+					$this->mDb->query("delete from `" . BIT_DB_PREFIX .
 						"search_syllable` where `syllable`=?", array($oldword), -1, -1);
 				}
 
@@ -169,25 +169,60 @@ class SearchLib extends BitBase {
 
 		if (count($allowed) > 0) {
 			// Putting in the below hack because mssql cannot select distinct on a text blob column.
-			$selectSql = $gBitDbType == 'mssql' ? " ,CAST(lc.`data` AS VARCHAR(250)) as `data` " : " ,lc.`data` ";
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 
+			$selectSql = '';
 			$joinSql = '';
 			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
 			$bindVars = array_merge( $words, $allowed );
 			LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
 
-			$query = "SELECT DISTINCT lc.`content_id`, lc.`title`, lc.`format_guid`, lc.`content_type_guid`,
-							si.`last_update`, lc.`hits`, lc.`created`, lc.`last_modified` $selectSql
-						FROM `" . BIT_DB_PREFIX . "search_index` si 
-			  			INNER JOIN `" . BIT_DB_PREFIX . "liberty_content` lc ON lc.`content_id` = si.`content_id` $joinSql 
-			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") 
-			  		 	$whereSql ORDER BY `hits` desc";
-			$querycant = "SELECT COUNT(DISTINCT si.`content_id`)
-						FROM `".BIT_DB_PREFIX."search_index` si 
-			  			INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON lc.`content_id` = si.`content_id` $joinSql
-			  			WHERE `searchword` IN (" . $qPlaceHolders1 . ") $whereSql";
-			$result = $this->mDb->query( $query, $bindVars, $max_records, $offset );
+			$query = "SELECT
+						lc.`content_id`,
+						lc.`title`,
+						lc.`format_guid`,
+						lc.`content_type_guid`,
+						lch.`hits`,
+						lc.`created`,
+						lc.`last_modified`,
+						lc.`data`,
+						COALESCE((
+						SELECT SUM(i_count)
+						FROM `" . BIT_DB_PREFIX . "search_index` si
+						WHERE si.`content_id`=lc.`content_id` AND si.`searchword` IN (" . $qPlaceHolders1 . ")
+						),0) AS relivency
+						$selectSql
+					FROM `" . BIT_DB_PREFIX . "liberty_content` lc
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_hits` lch ON (lc.`content_id` = lch.`content_id`)
+					$joinSql
+					WHERE (
+						SELECT SUM(i_count)
+						FROM `" . BIT_DB_PREFIX . "search_index` si
+						WHERE si.`content_id`=lc.`content_id`
+						GROUP BY
+						si.`content_id`,
+						lc.`content_id`,
+						si.`searchword`
+						HAVING si.`searchword` IN (" . $qPlaceHolders1 . ")
+						)>0 $whereSql
+					ORDER BY relivency DESC, lch.`hits` DESC
+					";
+			$querycant = "SELECT
+					COUNT(*)
+					FROM `" . BIT_DB_PREFIX . "liberty_content` lc
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_hits` lch ON (lc.`content_id` = lch.`content_id`)
+					$joinSql
+					WHERE (
+						SELECT SUM(i_count)
+						FROM `" . BIT_DB_PREFIX . "search_index` si
+						WHERE si.`content_id`=lc.`content_id`
+						GROUP BY
+						si.`content_id`,
+						lc.`content_id`,
+						si.`searchword`
+						HAVING si.`searchword` IN (" . $qPlaceHolders1 . ")
+						)>0 $whereSql";
+			$result = $this->mDb->query( $query,  array_merge( $words ,$bindVars), $max_records, $offset );
 			$cant   = $this->mDb->getOne( $querycant, $bindVars );
 			while ($res = $result->fetchRow()) {
 				$res['href'] = BIT_ROOT_URL . "index.php?content_id=" . $res['content_id'];
