@@ -34,13 +34,13 @@
 			</div>
 		{/form}
 
-		{if $words}<h2>{tr}Found '<span class="highlight">{$words}</span>' in {$cant_results} {if $where2}{$where2}{else}pages{/if}{/tr}</h2>{/if}
+		{if $words}<h2>{tr}Found '<span class="highlight">{$words|escape:htmlall}</span>' in {$cant_results} {if $where2}{$where2}{else}pages{/if}{/tr}</h2>{/if}
 
 		{section  name=search loop=$results}
 			{* using capture for no particular reason appart from a nicer layout - xing *}
 			{capture name=title}
 				{assign var=guid value=$results[search].content_type_guid}
-				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words}">{$results[search].title}</a>
+				{tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} <a href="{$results[search].href}&highlight={$words|escape:url}">{$results[search].title}</a>
 				<small>&bull;&nbsp;{tr}Relivence{/tr}: {$results[search].relivency} &bull;&nbsp;{tr}Hits{/tr}: {$results[search].hits}
 					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}
 						&nbsp;&bull;&nbsp;
