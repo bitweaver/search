@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.24 2006/08/19 17:01:08 hash9 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.25 2006/08/30 14:26:11 hash9 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.24 2006/08/19 17:01:08 hash9 Exp $
+ * $Id: search_lib.php,v 1.25 2006/08/30 14:26:11 hash9 Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -182,7 +182,7 @@ class SearchLib extends BitBase {
 						lc.`title`,
 						lc.`format_guid`,
 						lc.`content_type_guid`,
-						lch.`hits`,
+						COALESCE(lch.`hits`,0) AS hits,
 						lc.`created`,
 						lc.`last_modified`,
 						lc.`data`,
@@ -205,7 +205,7 @@ class SearchLib extends BitBase {
 						si.`searchword`
 						HAVING si.`searchword` IN (" . $qPlaceHolders1 . ")
 						)>0 $whereSql
-					ORDER BY relivency DESC, lch.`hits` DESC
+					ORDER BY relivency DESC, hits DESC
 					";
 			$querycant = "SELECT
 					COUNT(*)
