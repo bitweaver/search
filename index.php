@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.17 2006/06/29 21:26:29 windblown Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.18 2006/09/07 10:51:48 lsces Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -38,7 +38,7 @@ if ($gBitSystem->isFeatureActive("stats_search")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
-$content_type_guid = 'pages';
+$content_type_guid = '';
 if (isset($_REQUEST["content_type_guid"])) {
 	$content_type_guid = $_REQUEST["content_type_guid"];
 }
