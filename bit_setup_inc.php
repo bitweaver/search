@@ -9,7 +9,11 @@ $registerHash = array(
 $gBitSystem->registerPackage( $registerHash );
 
 if( $gBitSystem->isPackageActive( 'search' ) ) {
-	$gBitSystem->registerAppMenu( SEARCH_PKG_NAME, ucfirst( SEARCH_PKG_DIR ), SEARCH_PKG_URL.'index.php', '', 'search');
+	$menuHash = array(
+		'package_name'  => SEARCH_PKG_NAME,
+		'index_url'     => SEARCH_PKG_URL.'index.php',
+	);
+	$gBitSystem->registerAppMenu( $menuHash );
 
 	// **********  SEARCH  ************
 	// Register the search refresh function
