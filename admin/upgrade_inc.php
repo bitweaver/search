@@ -13,6 +13,12 @@ array( 'DATADICT' => array(
 		'tiki_search_stats'   => 'search_stats',
 		'tiki_searchwords'    => 'search_words',
 	)),
+	array( 'RENAMECOLUMN' => array(
+		'search_index' => array( '`count`' => '`i_count` I4' ),
+	)),
+	array( 'DROPCOLUMN' => array(
+		'search_index' => array( '`location`' ),
+	)),
 )),
 	)
 ),
