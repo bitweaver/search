@@ -1,5 +1,7 @@
 <?php
 /**
+ * @package search
+ *
  * Command Line Site Reindex
  * Created with stub from jht001 and help from KainX (Thanks to you both)
  * 
@@ -33,7 +35,9 @@
  *
  */
 
-// Define Server Variables so script won't puke on command line
+/**
+ * Define Server Variables so script won't puke on command line
+ */ 
 $_SERVER['SERVER_NAME']     = 'batch';
 $_SERVER['HTTP_HOST']       = 'batch';
 $_SERVER['HTTP_USER_AGENT'] = 'batch';
