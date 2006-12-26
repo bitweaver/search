@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.27 2006/10/21 20:21:52 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.28 2006/12/26 17:10:46 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.27 2006/10/21 20:21:52 lsces Exp $
+ * $Id: search_lib.php,v 1.28 2006/12/26 17:10:46 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -196,7 +196,7 @@ class SearchLib extends BitBase {
 					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_hits` lch ON (lc.`content_id` = lch.`content_id`)
 					$joinSql
 					WHERE (
-						SELECT FIRST 1 SUM(i_count)
+						SELECT SUM(i_count)
 						FROM `" . BIT_DB_PREFIX . "search_index` si
 						WHERE si.`content_id`=lc.`content_id`
 						GROUP BY
@@ -206,6 +206,7 @@ class SearchLib extends BitBase {
 						)>0 $whereSql
 					ORDER BY 9 DESC, 5 DESC
 					";
+						//SELECT FIRST 1 SUM(i_count)
 			$querycant = "SELECT
 					COUNT(*)
 					FROM `" . BIT_DB_PREFIX . "liberty_content` lc

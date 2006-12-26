@@ -1,10 +1,13 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.11 2006/08/18 11:10:31 sylvieg Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.12 2006/12/26 17:10:46 squareing Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
 // Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details.
+
+$feedback = array();
+
 $formSearchToggles = array(
 	'search_stats' => array(
 		'label' => 'Search Statistics',
@@ -16,6 +19,7 @@ $formSearchToggles = array(
 		'note' => 'Index articles, blogs and wiki pages immdiately on submission. If unchecked, pages will be updated randomly according the the refresh rate below.',
 	),
 );
+
 $formSearchInts = array(
 	'search_refresh_rate' => array(
 		'label' => 'Search Refresh Rate',
@@ -43,39 +47,43 @@ $formSearchInts = array(
 	),
 );
 
-if (isset($_REQUEST["searchaction"])) {
-	switch (strtolower($_REQUEST["searchaction"])) {
-		case "change preferences" :
-			foreach( $formSearchInts as $item => $data ) {
-				simple_set_int( $item, SEARCH_PKG_NAME );
-				$formSearchInts[$item]['value'] = $_REQUEST[$item];
-			}
-			foreach( $formSearchToggles as $item => $data ) {
-				simple_set_toggle( $item, SEARCH_PKG_NAME );
-			}
-			break;
-		case "clear searchwords" :
-			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
-			delete_search_words_and_syllables();
-			break;
-		case "delete index only" :
-			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
-			delete_index_content_type($_REQUEST["where"]);
-			break;
-		case "delete and rebuild index" :
-			require_once( SEARCH_PKG_PATH.'/refresh_functions.php');
-			rebuild_index($_REQUEST["where"]);
-			break;
+if( !empty( $_REQUEST['del_index'] ) ) {
+	require_once( SEARCH_PKG_PATH.'/refresh_functions.php' );
+	delete_index_content_type( $_REQUEST["where"] );
+	$feedback['success'] = tra( "The search index was successfully deleted." );
+}
+
+if( !empty( $_REQUEST['del_index_reindex'] ) ) {
+	require_once( SEARCH_PKG_PATH.'/refresh_functions.php' );
+	$count = rebuild_index( $_REQUEST["where"] );
+	$feedback['success'] = tra( "The search index was successfully deleted." ).tra( "Number of items re-indexed" ).": ".$count;
+}
+
+if( !empty( $_REQUEST['del_searchwords'] ) ) {
+	require_once( SEARCH_PKG_PATH.'/refresh_functions.php' );
+	delete_search_words_and_syllables();
+	$feedback['success'] = tra( "The searchwords were successfully purged from the database." );
+}
+
+if( !empty( $_REQUEST['store_prefs'] ) ) {
+	foreach( $formSearchInts as $item => $data ) {
+		simple_set_int( $item, SEARCH_PKG_NAME );
+		$formSearchInts[$item]['value'] = $_REQUEST[$item];
+	}
+	foreach( $formSearchToggles as $item => $data ) {
+		simple_set_toggle( $item, SEARCH_PKG_NAME );
 	}
 }
+
 foreach( $formSearchInts as $item => $data ) {
 	$formSearchInts[$item]['value'] = $gBitSystem->getConfig( $item );
 }
-$gBitSmarty->assign( 'formSearchToggles',$formSearchToggles );
-$gBitSmarty->assign( 'formSearchInts',$formSearchInts );
+$gBitSmarty->assign( 'formSearchToggles', $formSearchToggles );
+$gBitSmarty->assign( 'formSearchInts', $formSearchInts );
+$gBitSmarty->assign( 'feedback', $feedback );
 
 /* usually done in mod_package_search.php - but the module can be not here the first time */
-if ( empty($contentTypes) ) {
+if( empty( $contentTypes ) ) {
 	$contentTypes = array( '' => 'All Content' );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];

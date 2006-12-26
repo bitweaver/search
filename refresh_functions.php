@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.28 2006/10/11 06:05:45 spiderr Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.29 2006/12/26 17:10:46 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.28 2006/10/11 06:05:45 spiderr Exp $
+ * $Id: refresh_functions.php,v 1.29 2006/12/26 17:10:46 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -186,11 +186,12 @@ function rebuild_index($pContentType, $pUnindexedOnly = false) {
 		delete_index_content_type($pContentType);
 	}
 	$query  = "SELECT `content_id`, `content_type_guid` FROM `" . BIT_DB_PREFIX . "liberty_content`";
-	if ( $pContentType <> "pages") {
+	if( !empty( $pContentType ) && $pContentType != "pages" ) {
 		$whereClause = " WHERE `content_type_guid` = ?";
 		$arguments[] = $pContentType;
 	}
-	if ($pUnindexedOnly) {
+
+	if( $pUnindexedOnly ) {
 		if (empty($whereClause)) {
 			$whereClause = " WHERE ";
 		} else {
@@ -198,8 +199,9 @@ function rebuild_index($pContentType, $pUnindexedOnly = false) {
 		}
 		$whereClause .= "`content_id` NOT IN (SELECT DISTINCT `content_id` FROM `" . BIT_DB_PREFIX . "search_index`)" ;
 	}
+
 	$orderBy = " ORDER BY `content_type_guid` ";
-	$result = $gBitSystem->mDb->query($query . $whereClause . $orderBy, $arguments);
+	$result = $gBitSystem->mDb->query( $query.$whereClause.$orderBy, $arguments );
 	$count  = 0;
 	if( $result ) {
 		$count  = $result->RecordCount();
