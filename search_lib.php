@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.28 2006/12/26 17:10:46 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.29 2006/12/27 07:30:07 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.28 2006/12/26 17:10:46 squareing Exp $
+ * $Id: search_lib.php,v 1.29 2006/12/27 07:30:07 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -187,9 +187,9 @@ class SearchLib extends BitBase {
 						lc.`last_modified`,
 						lc.`data`,
 						COALESCE((
-						SELECT SUM(i_count)
-						FROM `" . BIT_DB_PREFIX . "search_index` si
-						WHERE si.`content_id`=lc.`content_id` AND si.`searchword` IN (" . $qPlaceHolders1 . ")
+							SELECT FIRST 1 SUM(i_count)
+							FROM `" . BIT_DB_PREFIX . "search_index` si
+							WHERE si.`content_id`=lc.`content_id` AND si.`searchword` IN (" . $qPlaceHolders1 . ")
 						),0) AS relivency
 						$selectSql
 					FROM `" . BIT_DB_PREFIX . "liberty_content` lc
@@ -206,7 +206,6 @@ class SearchLib extends BitBase {
 						)>0 $whereSql
 					ORDER BY 9 DESC, 5 DESC
 					";
-						//SELECT FIRST 1 SUM(i_count)
 			$querycant = "SELECT
 					COUNT(*)
 					FROM `" . BIT_DB_PREFIX . "liberty_content` lc
