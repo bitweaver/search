@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.5 2006/02/10 23:53:38 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.6 2006/12/31 11:29:56 squareing Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,18 +8,18 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_global_search.php,v 1.5 2006/02/10 23:53:38 lsces Exp $
+ * $Id: mod_global_search.php,v 1.6 2006/12/31 11:29:56 squareing Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
  */
 global $gLibertySystem;
 
-if ( empty($contentTypes) ) {
-	$contentTypes = array( '' => 'All Content' );
+if( empty( $contentTypes ) ) {
+	$contentTypes = array( '' => tra( 'All Content' ) );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
-		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+		$contentTypes[$cType['content_type_guid']] = tra( $cType['content_description'] );
 	}
-	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 }
+$gBitSmarty->assign( 'contentTypes', $contentTypes );
 ?>
