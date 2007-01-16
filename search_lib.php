@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.29 2006/12/27 07:30:07 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.30 2007/01/16 22:41:16 hash9 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.29 2006/12/27 07:30:07 squareing Exp $
+ * $Id: search_lib.php,v 1.30 2007/01/16 22:41:16 hash9 Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -187,7 +187,7 @@ class SearchLib extends BitBase {
 						lc.`last_modified`,
 						lc.`data`,
 						COALESCE((
-							SELECT FIRST 1 SUM(i_count)
+							SELECT SUM(i_count)
 							FROM `" . BIT_DB_PREFIX . "search_index` si
 							WHERE si.`content_id`=lc.`content_id` AND si.`searchword` IN (" . $qPlaceHolders1 . ")
 						),0) AS relivency
@@ -199,10 +199,9 @@ class SearchLib extends BitBase {
 						SELECT SUM(i_count)
 						FROM `" . BIT_DB_PREFIX . "search_index` si
 						WHERE si.`content_id`=lc.`content_id`
+						AND si.`searchword` IN (" . $qPlaceHolders1 . ")
 						GROUP BY
-						si.`content_id`,
-						si.`searchword`
-						HAVING si.`searchword` IN (" . $qPlaceHolders1 . ")
+						si.`content_id` 
 						)>0 $whereSql
 					ORDER BY 9 DESC, 5 DESC
 					";
@@ -215,10 +214,9 @@ class SearchLib extends BitBase {
 						SELECT SUM(i_count)
 						FROM `" . BIT_DB_PREFIX . "search_index` si
 						WHERE si.`content_id`=lc.`content_id`
+						AND si.`searchword` IN (" . $qPlaceHolders1 . ")
 						GROUP BY
-						si.`content_id`,
-						si.`searchword`
-						HAVING si.`searchword` IN (" . $qPlaceHolders1 . ")
+						si.`content_id`
 						)>0 $whereSql";
 			$result = $this->mDb->query( $query,  array_merge( $words ,$bindVars), $max_records, $offset );
 			$cant   = $this->mDb->getOne( $querycant, $bindVars );
