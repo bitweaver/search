@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.30 2007/01/16 22:41:16 hash9 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.31 2007/01/17 01:53:38 hash9 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.30 2007/01/16 22:41:16 hash9 Exp $
+ * $Id: search_lib.php,v 1.31 2007/01/17 01:53:38 hash9 Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -60,7 +60,8 @@ class SearchLib extends BitBase {
 	 * Then, it get a list of words from the search_words table and returns an array of them
 	*/
 	function get_wordlist_from_syllables($syllables) {
-		global $search_syll_age;
+		global $gBitSystem;
+		$search_syll_age = $gBitSystem->getConfig( 'search_syll_age', SEARCH_PKG_NAME );
 		$ret = array();
 		foreach($syllables as $syllable) {
 			$bindvars = array($syllable);
@@ -98,9 +99,10 @@ class SearchLib extends BitBase {
 	}
 
 	function refresh_lru_wordlist($syllable) {
-		global $search_max_syllwords;
-		global $search_lru_length;
-		global $search_lru_purge_rate;
+		global $gBitSystem;
+		$search_max_syllwords = $gBitSystem->getConfig( 'search_max_syllwords', SEARCH_PKG_NAME );;
+		$search_lru_length = $gBitSystem->getConfig( 'search_lru_length', SEARCH_PKG_NAME );;
+		$search_lru_purge_rate = $gBitSystem->getConfig( 'search_lru_purge_rate', SEARCH_PKG_NAME );
 		$ret = array();
 
 		// delete from wordlist and lru list
