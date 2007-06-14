@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.32 2007/05/19 05:37:52 laetzer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.33 2007/06/14 17:49:49 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.32 2007/05/19 05:37:52 laetzer Exp $
+ * $Id: search_lib.php,v 1.33 2007/06/14 17:49:49 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -169,7 +169,8 @@ class SearchLib extends BitBase {
 			}
 		}
 
-		if (count($allowed) > 0) {
+		if (count($allowed) > 0 && count($words) > 0) {
+			vd($words);
 			// Putting in the below hack because mssql cannot select distinct on a text blob column.
 			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
 
