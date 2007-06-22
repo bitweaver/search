@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.33 2007/06/14 17:49:49 nickpalmer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.34 2007/06/22 11:15:00 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,14 +8,13 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.33 2007/06/14 17:49:49 nickpalmer Exp $
+ * $Id: search_lib.php,v 1.34 2007/06/22 11:15:00 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
 
 /**
  * @package search
- * @subpackage SearchLib
  */
 
 class SearchLib extends BitBase {
