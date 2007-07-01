@@ -12,6 +12,7 @@ if( $gBitSystem->isPackageActive( 'search' ) ) {
 	$menuHash = array(
 		'package_name'  => SEARCH_PKG_NAME,
 		'index_url'     => SEARCH_PKG_URL.'index.php',
+		'menu_template' => 'bitpackage:search/menu_search.tpl',
 	);
 	$gBitSystem->registerAppMenu( $menuHash );
 
@@ -26,5 +27,4 @@ if( $gBitSystem->isPackageActive( 'search' ) ) {
 	$gLibertySystem->registerService( LIBERTY_SERVICE_SEARCH, SEARCH_PKG_NAME, 
 		array('content_store_function' => 'refresh_index'));
 }
-
 ?>
