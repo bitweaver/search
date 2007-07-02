@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.35 2007/06/25 09:03:46 nickpalmer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.36 2007/07/02 08:05:56 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.35 2007/06/25 09:03:46 nickpalmer Exp $
+ * $Id: search_lib.php,v 1.36 2007/07/02 08:05:56 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -40,16 +40,15 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function find($where, $words, $offset, $max_records, $plUsePart = false) {
-		$words = preg_split("/[\W]+/", strtolower($words), -1, PREG_SPLIT_NO_EMPTY);
-		if ($plUsePart) {
-			$wordList = $this->get_wordlist_from_syllables($words);
-			if(array($wordList)) {
-				$words = array_merge($words, $wordList);
+	function find( &$pParamHash ) { // $where, $words, $offset, $max_records, $plUsePart = false) {
+		$pParamHash['words'] = preg_split("/[\W]+/", strtolower($pParamHash['words']), -1, PREG_SPLIT_NO_EMPTY);
+		if ( isset($pParamHash['$plUsePart']) && $pParamHash['$plUsePart'] ) {
+			$wordList = $this->get_wordlist_from_syllables( $pParamHash['words'] );
+			if ( array( $wordList ) ) {
+				$pParamHash['words'] = array_merge( $pParamHash['words'], $wordList );
 			}
 		}
-//		$res = $this->find_exact($where, $words, $offset, $max_records);
-		$res = $this->find_exact_generic($where, $words, $offset, $max_records);
+		$res = $this->find_exact_generic( $pParamHash );
 		return $res;
 	}
 
@@ -157,25 +156,25 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function find_exact_generic($where, $words, $offset, $max_records) {
+	function find_exact_generic( &$pParamHash ) {
 		global $gPage, $gBitSystem, $gLibertySystem, $gBitDbType;
 		$allowed = array();
 		$ret    = array();
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
-			if (($where == $contentType["content_type_guid"] or $where == "") // pages ?
+			if (( $pParamHash['content_type_guid'] == $contentType["content_type_guid"] or $pParamHash['content_type_guid'] == "" ) // pages ?
 			and $this->has_permission($contentType["content_type_guid"])) {
 				$allowed[] = $contentType["content_type_guid"];
 			}
 		}
 
-		if (count($allowed) > 0 && count($words) > 0) {
+		if (count($allowed) > 0 && count($pParamHash['words']) > 0) {
 			// Putting in the below hack because mssql cannot select distinct on a text blob column.
-			$qPlaceHolders1 = implode(',', array_fill(0, count($words), '?'));
+			$qPlaceHolders1 = implode(',', array_fill(0, count($pParamHash['words']), '?'));
 
 			$selectSql = '';
 			$joinSql = '';
 			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
-			$bindVars = array_merge( $words, $allowed );
+			$bindVars = array_merge( $pParamHash['words'], $allowed );
 			LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
 
 			$query = "SELECT
@@ -219,15 +218,16 @@ class SearchLib extends BitBase {
 						GROUP BY
 						si.`content_id`
 						)>0 $whereSql";
-			$result = $this->mDb->query( $query,  array_merge( $words ,$bindVars), $max_records, $offset );
-			$cant   = $this->mDb->getOne( $querycant, $bindVars );
+			$result = $this->mDb->query( $query,  array_merge( $pParamHash['words'] ,$bindVars), $pParamHash['max_records'], $pParamHash['offset'] );
+			$pParamHash['cant'] = $this->mDb->getOne( $querycant, $bindVars );
 			while ($res = $result->fetchRow()) {
 				$res['href'] = BIT_ROOT_URL . "index.php?content_id=" . $res['content_id'];
 				$ret[] = $res;
 			}
-			return array('data' => $ret, 'cant' => $cant);
+			return $ret;
 		} else {
-			return array('data' => array(),'cant' => 0);
+			$pParamHash['cant'] = 0;
+			return array();
 		}
 	}
 
@@ -235,12 +235,16 @@ class SearchLib extends BitBase {
 		global $gBitUser;
 		$ret = false;
 		switch ($pContentType) {
-			case "bitarticle"     : $perm = "p_articles_read";	break;
-			case "bitpage"        : $perm = "p_wiki_view_page";			break;
-			case "bitblogpost"    : $perm = "p_blogs_view";	    break;
-			case "bitcomment"     : $perm = "p_liberty_read_comments";	break;
-			case "fisheyegallery" : $perm = "p_fisheye_view";	break;
-			default               : $perm = "";						break;
+			case "bitarticle" 		: $perm = "p_articles_read";			break;
+			case "bitpage"			: $perm = "p_wiki_view_page";			break;
+			case "bitblog"			: $perm = "p_blogs_view";				break;
+			case "bitblogpost"		: $perm = "p_blogs_view";				break;
+			case "bitcomment"		: $perm = "p_liberty_read_comments";	break;
+			case "fisheyegallery"	: $perm = "p_fisheye_view";				break;
+			case "fisheyeitem" 		: $perm = "p_fisheye_view";				break;
+			case "treasurygallery"	: $perm = "p_treasury_view";			break;
+			case "treasuryitem"		: $perm = "p_treasury_view";			break;
+			default					: $perm = "";							break;
 		}
 		return $gBitUser->hasPermission($perm);
 	}

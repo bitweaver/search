@@ -34,7 +34,7 @@
 			</div>
 		{/form}
 
-		{if $words}<h2>{tr}Found '<span class="highlight">{$words|escape:htmlall}</span>' in {$cant_results} {if $where2}{$where2}{else}pages{/if}{/tr}</h2>{/if}
+		{if $words}<h2>{tr}Found '<span class="highlight">{$words|escape:htmlall}</span>' in {$listInfo.total_records} {if $where2}{$where2}{else}pages{/if}{/tr}</h2>{/if}
 
 		{section  name=search loop=$results}
 			{* using capture for no particular reason appart from a nicer layout - xing *}
@@ -68,7 +68,7 @@
 			{if $words}<div class="norecords">{tr}No pages matched the search criteria{/tr}</div>{/if}
 		{/section}
 
-		{pagination}
+		{pagination usePart=$partialOnOff content_type_guid=$content_type_guid highlight=$words|escape }
 	</div>
 </div>
 {/strip}
