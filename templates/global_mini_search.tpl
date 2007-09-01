@@ -6,7 +6,7 @@
 		{html_options options=$contentTypes name="content_type_guid" selected=$perms[user].level}
 	</div>
 	<div class="row submit">
-		<input type="submit" name="search" value="{tr}go{/tr}"/>
+		<input type="submit" name="search" value="{tr}go{/tr}" />
 	</div>
 {/form}
 {/strip}
