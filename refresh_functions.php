@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.29 2006/12/26 17:10:46 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.30 2007/12/04 17:42:09 joasch Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.29 2006/12/26 17:10:46 squareing Exp $
+ * $Id: refresh_functions.php,v 1.30 2007/12/04 17:42:09 joasch Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -32,6 +32,9 @@ function random_refresh_index($pContentType = "") {
 			break;
 		case "wiki" :
 			$table = "wiki_pages";
+			break;
+		case "blogs" :
+			$table = "blogs";
 			break;
 		case "blog_posts" :
 			$table = "blog_posts";
@@ -79,41 +82,9 @@ function refresh_index( $pContentObject = null ) {
 	}
 }
 
-// Legacy index handlers - blogs (blog headers) are not in liberty_content yet
-//  so we can't handle them like the others
-
-function random_refresh_index_blogs() {
-	global $gBitSystem;
-	if( $gBitSystem->isPackageActive( 'blogs' ) ) {
-		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
-		// get random blog
-		$cant = $gBitSystem->mDb->getOne("SELECT COUNT(*) FROM `".BIT_DB_PREFIX."blogs`", array());
-		if($cant > 0) {
-			$query  = "SELECT `blog_id` FROM `" . BIT_DB_PREFIX . "blogs`";
-			$blogId = $gBitSystem->mDb->getOne($query, array(), 1, rand(0, $cant - 1));
-			refresh_index_blogs($blogId);
-		}
-	}
-}
-
-function refresh_index_blogs( $pBlogId = 0 ) {
-	global $gBitSystem;
-	if( $pBlogId > 0 and $gBitSystem->isPackageActive( 'blogs' ) ) {
-		require_once( BLOGS_PKG_PATH.'BitBlog.php' );
-		$query = "SELECT `title`, `data`, uu.`login` AS `user_login`, uu.`real_name`
-					FROM `".BIT_DB_PREFIX."blogs` b
-						INNER JOIN `".BIT_DB_PREFIX."liberty_content` lc ON b.`content_id` = lc.`content_id`
-						INNER JOIN `".BIT_DB_PREFIX."users_users` uu ON uu.`user_id` = lc.`user_id`
-					WHERE `blog_id` = ? ";
-		$res   = $gBitSystem->mDb->getRow($query, array($pBlogId));
-		$words = prepare_words($res["title"]." ".$res["user_login"]." ".$res["real_name"]." ".$res["data"]);
-		insert_index($words, BITBLOG_CONTENT_TYPE_GUID, -1, $pBlogId);
-	}
-}
-
 function refresh_index_oldest(){
 	global $gBitSystem;
-	$contentId = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
+	$contentId = $gBitSystem->mDb->getOne("SELECT `content_id` FROM `" . BIT_DB_PREFIX .
 				"search_index` ORDER BY `last_update`", array());
 	if ( isset($contentId) ) {
 		refresh_index($contentId);
@@ -170,7 +141,7 @@ function delete_index_content_type($pContentType) {
 	$sql   = "DELETE FROM `" . BIT_DB_PREFIX . "search_index`";
 	$array = array();
 	if ( $pContentType <> "pages" ) {
-		$sql  .= " WHERE `content_id` IN (SELECT `content_id` FROM `" . BIT_DB_PREFIX . 
+		$sql  .= " WHERE `content_id` IN (SELECT `content_id` FROM `" . BIT_DB_PREFIX .
 				 "liberty_content` where `content_type_guid` = ?)";
 		$array = array($pContentType);
 	}
