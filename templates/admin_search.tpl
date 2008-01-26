@@ -32,6 +32,34 @@
 		{/form}
 	{/jstab}
 
+	{jstab title="Searchable Content"}
+		{form legend="Searchable Content"}
+			{foreach from=$formSearchTypeToggles key=item item=output}
+				<div class="row">
+					{formlabel label=`$output.label` for=$item}
+					{forminput}
+						{html_checkboxes name="$item" values="y" checked=$gBitSystem->getConfig($item) labels=false id=$item}
+						{formhelp note=`$output.note` page=`$output.page`}
+					{/forminput}
+				</div>
+			{/foreach}
+
+			<input type="hidden" name="page" value="{$page}" />
+			<div class="row">
+				{formlabel label="Searchable Content"}
+				{forminput}
+					{html_checkboxes options=$formSearchable.guids value=y name=searchable_content separator="<br />" checked=$formSearchable.checked}
+					{formhelp note="Here you can select what content can be searched."}
+				{/forminput}
+			</div>
+
+			<div class="row submit">
+				<input type="submit" name="store_content" value="{tr}Change preferences{/tr}" />
+			</div>
+		{/form}
+
+	{/jstab}
+
 	{jstab title="Delete / Rebuild Index"}
 		{formfeedback hash=$feedback}
 

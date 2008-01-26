@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.30 2007/12/04 17:42:09 joasch Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/refresh_functions.php,v 1.31 2008/01/26 23:19:58 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: refresh_functions.php,v 1.30 2007/12/04 17:42:09 joasch Exp $
+ * $Id: refresh_functions.php,v 1.31 2008/01/26 23:19:58 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage functions
@@ -152,7 +152,7 @@ function rebuild_index($pContentType, $pUnindexedOnly = false) {
 	global $gBitSystem, $gLibertySystem;
 	$arguments   = array();
 	$whereClause = "";
-	ini_set("max_execution_time", "300");
+	ini_set("max_execution_time", "3000");
 	if (!$pUnindexedOnly) {
 		delete_index_content_type($pContentType);
 	}

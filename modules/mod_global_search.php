@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.7 2006/12/31 13:01:16 squareing Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.8 2008/01/26 23:19:59 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,17 +8,23 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_global_search.php,v 1.7 2006/12/31 13:01:16 squareing Exp $
+ * $Id: mod_global_search.php,v 1.8 2008/01/26 23:19:59 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
  */
 global $gLibertySystem;
 
+require_once(SEARCH_PKG_PATH."search_lib.php");
+
 if( empty( $contentTypes ) ) {
 	$contentTypes = array( '' => tra( 'All Content' ) );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
-		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+		if (SearchLib::has_permission($cType["content_type_guid"])
+			and ( ! $gBitSystem->getConfig('search_restrict_types') ||
+				  $gBitSystem->getConfig('search_pkg_'.$cType["content_type_guid"]) ) ) {
+			$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+		}
 	}
 }
 $gBitSmarty->assign( 'contentTypes', $contentTypes );

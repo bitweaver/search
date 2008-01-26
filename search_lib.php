@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.36 2007/07/02 08:05:56 lsces Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.37 2008/01/26 23:19:58 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.36 2007/07/02 08:05:56 lsces Exp $
+ * $Id: search_lib.php,v 1.37 2008/01/26 23:19:58 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -162,7 +162,9 @@ class SearchLib extends BitBase {
 		$ret    = array();
 		foreach( $gLibertySystem->mContentTypes as $contentType ) {
 			if (( $pParamHash['content_type_guid'] == $contentType["content_type_guid"] or $pParamHash['content_type_guid'] == "" ) // pages ?
-			and $this->has_permission($contentType["content_type_guid"])) {
+			and $this->has_permission($contentType["content_type_guid"])
+			and ( ! $gBitSystem->getConfig('search_restrict_types') ||
+				  $gBitSystem->getConfig('search_pkg_'.$contentType["content_type_guid"]) ) ) {
 				$allowed[] = $contentType["content_type_guid"];
 			}
 		}
@@ -231,22 +233,20 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function has_permission($pContentType = "") {
-		global $gBitUser;
-		$ret = false;
-		switch ($pContentType) {
-			case "bitarticle" 		: $perm = "p_articles_read";			break;
-			case "bitpage"			: $perm = "p_wiki_view_page";			break;
-			case "bitblog"			: $perm = "p_blogs_view";				break;
-			case "bitblogpost"		: $perm = "p_blogs_view";				break;
-			case "bitcomment"		: $perm = "p_liberty_read_comments";	break;
-			case "fisheyegallery"	: $perm = "p_fisheye_view";				break;
-			case "fisheyeitem" 		: $perm = "p_fisheye_view";				break;
-			case "treasurygallery"	: $perm = "p_treasury_view";			break;
-			case "treasuryitem"		: $perm = "p_treasury_view";			break;
-			default					: $perm = "";							break;
+	function has_permission($pContentType = NULL) {
+		global $gBitUser, $gLibertySystem;
+
+		if ( ! empty( $pContentType ) ) {
+			$object = $gLibertySystem->getLibertyObject(1, $pContentType, FALSE);
+			if ( ! empty( $object ) ) {
+				// Note that we can't do verify access here because
+				// we are using a generic object but we can at least get a
+				// basic permission check here.
+				return $object->hasViewPermission(FALSE);
+			}
 		}
-		return $gBitUser->hasPermission($perm);
+
+		return FALSE;
 	}
 
 } # class SearchLib

@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.14 2006/12/31 13:01:16 squareing Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.15 2008/01/26 23:19:59 nickpalmer Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -82,11 +82,44 @@ $gBitSmarty->assign( 'formSearchToggles', $formSearchToggles );
 $gBitSmarty->assign( 'formSearchInts', $formSearchInts );
 $gBitSmarty->assign( 'feedback', $feedback );
 
+$formSearchTypeToggles = array(
+	'search_restrict_types' => array(
+		'label' => 'Restrict Types',
+		'note' => 'If selected the search will be limited to those selected below.'
+	),
+);
+$gBitSmarty->assign( 'formSearchTypeToggles', $formSearchTypeToggles );
+
+// allow selection of what packages can have search
+foreach( $gLibertySystem->mContentTypes as $cType ) {
+	$formSearchable['guids']['search_pkg_'.$cType['content_type_guid']]  = $cType['content_description'];
+}
+
+if( !empty( $_REQUEST['store_content'] ) ) {
+	foreach( $formSearchTypeToggles as $item => $data ) {
+		simple_set_toggle( $item, SEARCH_PKG_NAME );
+	}
+	foreach( array_keys( $formSearchable['guids'] ) as $searchable ) {
+		$gBitSystem->storeConfig( $searchable, ( ( !empty( $_REQUEST['searchable_content'] ) && in_array( $searchable, $_REQUEST['searchable_content'] ) ) ? 'y' : NULL ), SEARCH_PKG_NAME );
+	}
+
+}
+
+// check the correct packages in the package selection
+foreach( $gLibertySystem->mContentTypes as $cType ) {
+	if( $gBitSystem->getConfig( 'search_pkg_'.$cType['content_type_guid'] ) ) {
+		$formSearchable['checked'][] = 'search_pkg_'.$cType['content_type_guid'];
+	}
+}
+$gBitSmarty->assign( 'formSearchable', $formSearchable );
+
 /* usually done in mod_package_search.php - but the module can be not here the first time */
 if( empty( $contentTypes ) ) {
 	$contentTypes = array( '' => tra( 'All Content' ) );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
-		$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+		if( $gBitSystem->getConfig( 'search_pkg_'.$cType['content_type_guid']) ) {
+			$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+		}
 	}
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );
 }
