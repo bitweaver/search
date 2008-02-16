@@ -17,7 +17,16 @@
 			<div class="row">
 				{formlabel label="Use Partial Word Search" for="usePart"}
 				{forminput}
-					<input type="checkbox" name="usePart" id="usePart" {$partialOnOff} />
+					<input type="checkbox" name="usePart" id="usePart" {if $usePart}checked{/if} />
+					{formhelp note="This may slow search results"}
+				{/forminput}
+			</div>
+
+
+			<div class="row">
+				{formlabel label="And Terms Together" for="useAnd"}
+				{forminput}
+					<input type="checkbox" name="useAnd" id="useAnd" {if $useAnd}checked{/if} />
 					{formhelp note="This may slow search results"}
 				{/forminput}
 			</div>
@@ -68,7 +77,7 @@
 			{if $words}<div class="norecords">{tr}No pages matched the search criteria{/tr}</div>{/if}
 		{/section}
 
-		{pagination usePart=$partialOnOff content_type_guid=$content_type_guid highlight=$words|escape }
+		{pagination useAnd=$useAnd usePart=$usePart content_type_guid=$content_type_guid highlight=$words|escape }
 	</div>
 </div>
 {/strip}

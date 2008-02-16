@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.37 2008/01/26 23:19:58 nickpalmer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.38 2008/02/16 23:22:24 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.37 2008/01/26 23:19:58 nickpalmer Exp $
+ * $Id: search_lib.php,v 1.38 2008/02/16 23:22:24 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -156,30 +156,13 @@ class SearchLib extends BitBase {
 		return $ret;
 	}
 
-	function find_exact_generic( &$pParamHash ) {
-		global $gPage, $gBitSystem, $gLibertySystem, $gBitDbType;
-		$allowed = array();
-		$ret    = array();
-		foreach( $gLibertySystem->mContentTypes as $contentType ) {
-			if (( $pParamHash['content_type_guid'] == $contentType["content_type_guid"] or $pParamHash['content_type_guid'] == "" ) // pages ?
-			and $this->has_permission($contentType["content_type_guid"])
-			and ( ! $gBitSystem->getConfig('search_restrict_types') ||
-				  $gBitSystem->getConfig('search_pkg_'.$contentType["content_type_guid"]) ) ) {
-				$allowed[] = $contentType["content_type_guid"];
-			}
-		}
+	function find_with_or($allowed, $selectSql, $joinSql, $whereSql, $bindVars,&$pParamHash) {
+		// Putting in the below hack because mssql cannot select distinct on a text blob column.
+		$qPlaceHolders1 = implode(',', array_fill(0, count($pParamHash['words']), '?'));
+		$bindVars = array_merge( $pParamHash['words'], $allowed );
+		LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
 
-		if (count($allowed) > 0 && count($pParamHash['words']) > 0) {
-			// Putting in the below hack because mssql cannot select distinct on a text blob column.
-			$qPlaceHolders1 = implode(',', array_fill(0, count($pParamHash['words']), '?'));
-
-			$selectSql = '';
-			$joinSql = '';
-			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
-			$bindVars = array_merge( $pParamHash['words'], $allowed );
-			LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
-
-			$query = "SELECT
+		$query = "SELECT
 						lc.`content_id`,
 						lc.`title`,
 						lc.`format_guid`,
@@ -227,9 +210,102 @@ class SearchLib extends BitBase {
 				$ret[] = $res;
 			}
 			return $ret;
+	}
+
+	function find_with_and($allowed, $selectSql, $joinSql, $whereSql, $bindVars, &$pParamHash) {
+		// Make a slot for the search word.
+		$bindVars[0] = NULL;
+		$bindVars = array_merge( $bindVars, $allowed );
+		LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
+
+		$ret = array();
+		$first = true;
+		foreach($pParamHash['words'] as $word) {
+			$query = "SELECT lc.`content_id` AS hash_key,
+						lc.`content_id`,
+						lc.`title`,
+						lc.`format_guid`,
+						lc.`content_type_guid`,
+						COALESCE(lch.`hits`,0) AS hits,
+						lc.`created`,
+						lc.`last_modified`,
+						lc.`data`,
+						si.`i_count` AS relevancy
+						$selectSql
+					FROM `" . BIT_DB_PREFIX . "liberty_content` lc
+					LEFT OUTER JOIN `".BIT_DB_PREFIX."liberty_content_hits` lch ON (lc.`content_id` = lch.`content_id`)
+					$joinSql
+					INNER JOIN `".BIT_DB_PREFIX."search_index` si ON (si.`content_id`=lc.`content_id` AND si.`searchword` = ? )
+					WHERE `i_count` > 0 $whereSql
+					ORDER BY 9 DESC, 5 DESC
+					";
+				$bindVars[0] = $word;
+				$result = $this->mDb->getAssoc( $query, $bindVars );
+				if ($first) {
+					$ret = $result;
+					$first = false;
+				}
+				else {
+					$this->mergeResults($ret, $result);
+				}
+			}
+			/* count it */
+			$pParamHash['cant'] = count($ret);
+
+			/* Sort it */
+			uasort($ret, 'search_relevance_sort');
+
+			/* slice it */
+			$ret = array_slice($ret, $pParamHash['offset'], $pParamHash['offset'] + $pParamHash['max_records']);
+
+			/* Set the hrefs. */
+			foreach ($ret as $content_id => $data) {
+				$ret[$content_id]['href'] = BIT_ROOT_URL . "index.php?content_id=" . $content_id;
+			}
+
+			return $ret;
+	}
+
+	function find_exact_generic( &$pParamHash ) {
+		global $gPage, $gBitSystem, $gLibertySystem, $gBitDbType;
+		$allowed = array();
+		$ret    = array();
+		foreach( $gLibertySystem->mContentTypes as $contentType ) {
+			if (( $pParamHash['content_type_guid'] == $contentType["content_type_guid"] or $pParamHash['content_type_guid'] == "" ) // pages ?
+			and $this->has_permission($contentType["content_type_guid"])
+			and ( ! $gBitSystem->getConfig('search_restrict_types') ||
+				  $gBitSystem->getConfig('search_pkg_'.$contentType["content_type_guid"]) ) ) {
+				$allowed[] = $contentType["content_type_guid"];
+			}
+		}
+
+		if (count($allowed) > 0 && count($pParamHash['words']) > 0) {
+			$selectSql = '';
+			$joinSql = '';
+			$whereSql = " AND  lc.`content_type_guid` IN (" . implode(',', array_fill(0, count($allowed), '?')) . ") ";
+			$bindVars = array();
+
+			if (isset($pParamHash['useAnd']) && $pParamHash['useAnd']) {
+				return $this->find_with_and($allowed, $selectSql, $joinSql, $whereSql, $bindVars, $pParamHash);
+			}
+			else {
+				return $this->find_with_or($allowed, $selectSql, $joinSql, $whereSql, $bindVars, $pParamHash);
+			}
 		} else {
 			$pParamHash['cant'] = 0;
 			return array();
+		}
+	}
+
+	function mergeResults(&$ret, $result) {
+		// Remove those that don't overlap or update relevance
+		foreach ($ret as $content_id => $data) {
+			if (!isset($result[$content_id])) {
+				unset($ret[$content_id]);
+			}
+			else {
+				$ret[$content_id]['relevancy'] += $result[$content_id]['relevancy'];
+			}
 		}
 	}
 
@@ -250,5 +326,15 @@ class SearchLib extends BitBase {
 	}
 
 } # class SearchLib
+
+if (!defined('search_relevance_sort')) {
+	function search_relevance_sort($a, $b) {
+		$rel = $b['relevancy'] - $a['relevancy'];
+		if ($rel == 0) {
+			$rel = $b['hits'] - $a['hits'];
+		}
+		return $rel;
+	}
+}
 
 ?>

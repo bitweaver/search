@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.22 2007/07/02 08:05:56 lsces Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.23 2008/02/16 23:22:24 nickpalmer Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -52,7 +52,15 @@ if( isset( $_REQUEST['usePart'] ) && $_REQUEST['usePart']=='on' ) {
 } else {
 	$_REQUEST['usePart']=false;
 }
+$gBitSmarty->assign('usePart', $_REQUEST['usePart']);
 $gBitSmarty->assign('searchType', $_REQUEST['usePart'] ? "Using Partial Word Search" : "Using Exact Word Search");
+
+if( isset( $_REQUEST['useAnd'] ) && $_REQUEST['useAnd']=='on' ) {
+	$_REQUEST['useAnd']=true;
+} else {
+	$_REQUEST['useAnd']=false;
+}
+$gBitSmarty->assign('useAnd', $_REQUEST['useAnd']);
 
 // Build the query using words
 if ((!isset($_REQUEST["words"])) || (empty($_REQUEST["words"]))) {
@@ -87,9 +95,6 @@ if ( $_REQUEST['cant'] > 0 ) {
 }
 LibertyContent::postGetList( $_REQUEST );
 $gBitSmarty->assign_by_ref( 'listInfo', $_REQUEST['listInfo'] );
-
-$partialOnOff = $_REQUEST["usePart"] ? 'checked' : '';
-$gBitSmarty->assign('partialOnOff', $partialOnOff);
 
 // Find search results (build array)
 $gBitSmarty->assign_by_ref('results', $results);
