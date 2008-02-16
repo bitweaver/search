@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.38 2008/02/16 23:22:24 nickpalmer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.39 2008/02/16 23:58:05 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.38 2008/02/16 23:22:24 nickpalmer Exp $
+ * $Id: search_lib.php,v 1.39 2008/02/16 23:58:05 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -161,7 +161,7 @@ class SearchLib extends BitBase {
 		$qPlaceHolders1 = implode(',', array_fill(0, count($pParamHash['words']), '?'));
 		$bindVars = array_merge( $pParamHash['words'], $allowed );
 		LibertyContent::getServicesSql( 'content_list_sql_function', $selectSql, $joinSql, $whereSql, $bindVars );
-
+		$ret = array();
 		$query = "SELECT
 						lc.`content_id`,
 						lc.`title`,
