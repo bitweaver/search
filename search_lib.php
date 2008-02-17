@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.39 2008/02/16 23:58:05 nickpalmer Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/search_lib.php,v 1.40 2008/02/17 00:47:42 nickpalmer Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: search_lib.php,v 1.39 2008/02/16 23:58:05 nickpalmer Exp $
+ * $Id: search_lib.php,v 1.40 2008/02/17 00:47:42 nickpalmer Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  */
@@ -255,13 +255,13 @@ class SearchLib extends BitBase {
 			/* Sort it */
 			uasort($ret, 'search_relevance_sort');
 
-			/* slice it */
-			$ret = array_slice($ret, $pParamHash['offset'], $pParamHash['offset'] + $pParamHash['max_records']);
-
 			/* Set the hrefs. */
 			foreach ($ret as $content_id => $data) {
 				$ret[$content_id]['href'] = BIT_ROOT_URL . "index.php?content_id=" . $content_id;
 			}
+
+			/* slice it */
+			$ret = array_slice($ret, $pParamHash['offset'], $pParamHash['offset'] + $pParamHash['max_records']);
 
 			return $ret;
 	}
