@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.12 2008/03/31 13:41:00 wjames5 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_package_search.php,v 1.13 2008/06/18 09:20:01 lsces Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,12 +8,16 @@
  * All Rights Reserved. See copyright.txt for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See license.txt for details
  *
- * $Id: mod_package_search.php,v 1.12 2008/03/31 13:41:00 wjames5 Exp $
+ * $Id: mod_package_search.php,v 1.13 2008/06/18 09:20:01 lsces Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
  */
-	require_once(SEARCH_PKG_PATH."search_lib.php");
+
+/**
+ * Initialization
+ */
+require_once(SEARCH_PKG_PATH."search_lib.php");
 
 	$tplName = strtolower( ACTIVE_PACKAGE ).'_mini_search.tpl';
 	$searchTemplatePath = BIT_ROOT_URL.constant( strtoupper( ACTIVE_PACKAGE ).'_PKG_PATH' ).'templates/'.$tplName;
