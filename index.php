@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.24 2008/06/25 22:21:23 spiderr Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/index.php,v 1.25 2008/08/31 23:39:37 laetzer Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See copyright.txt for details and a complete list of authors.
@@ -34,7 +34,7 @@ if( !empty($_REQUEST["highlight"]) ) {
 	die;
 }
 
-if ($gBitSystem->isFeatureActive("stats_search")) {
+if ($gBitSystem->isFeatureActive("search_stats")) {
 	$searchlib->register_search(isset($_REQUEST["words"]) ? $_REQUEST["words"] : '');
 }
 
