@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.18 2010/04/17 15:36:08 wjames5 Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.19 2010/04/17 22:46:10 wjames5 Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See below for details and a complete list of authors.
@@ -92,7 +92,7 @@ $gBitSmarty->assign( 'formSearchTypeToggles', $formSearchTypeToggles );
 
 // allow selection of what packages can have search
 foreach( $gLibertySystem->mContentTypes as $cType ) {
-	$formSearchable['guids']['search_pkg_'.$cType['content_type_guid']]  = $cType['content_description'];
+	$formSearchable['guids']['search_pkg_'.$cType['content_type_guid']]  = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 }
 
 if( !empty( $_REQUEST['store_content'] ) ) {

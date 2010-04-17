@@ -71,4 +71,7 @@ $moduleHash = array(
 
 $gBitInstaller->registerModules( $moduleHash );
 
-?>
+// Requirements
+$gBitInstaller->registerRequirements( SEARCH_PKG_NAME, array(
+    'liberty' => array( 'min' => '2.1.4' ),
+));
