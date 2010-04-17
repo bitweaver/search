@@ -52,7 +52,7 @@
 				<a href="{$results[search].href}&highlight={$words|escape:url}">{$results[search].title|escape}</a>
 				&nbsp;
 				<small>
-					&bull; {tr}{$gLibertySystem->mContentTypes.$guid.content_description}{/tr} &bull; {tr}Relevance{/tr}:&nbsp;{$results[search].relevancy} &bull; {tr}Hits{/tr}:&nbsp;{$results[search].hits}
+					&bull; {tr}{$gLibertySystem->getContentTypeName($guid)}{/tr} &bull; {tr}Relevance{/tr}:&nbsp;{$results[search].relevancy} &bull; {tr}Hits{/tr}:&nbsp;{$results[search].hits}
 					{if $gBitSystem->isFeatureActive( 'search_fulltext' )}
 						&nbsp;&bull;&nbsp;
 						{if $results[search].relevancy <= 0}
