@@ -1,6 +1,6 @@
 <?php
 
-// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.17 2009/10/01 14:17:04 wjames5 Exp $
+// $Header: /cvsroot/bitweaver/_bit_search/admin/admin_search_inc.php,v 1.18 2010/04/17 15:36:08 wjames5 Exp $
 
 // Copyright (c) 2002-2003, Luis Argerich, Garland Foster, Eduardo Polidor, et. al.
 // All Rights Reserved. See below for details and a complete list of authors.
@@ -118,7 +118,7 @@ if( empty( $contentTypes ) ) {
 	$contentTypes = array( '' => tra( 'All Content' ) );
 	foreach( $gLibertySystem->mContentTypes as $cType ) {
 		if( $gBitSystem->getConfig( 'search_pkg_'.$cType['content_type_guid']) ) {
-			$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+			$contentTypes[$cType['content_type_guid']] = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 		}
 	}
 	$gBitSmarty->assign( 'contentTypes', $contentTypes );

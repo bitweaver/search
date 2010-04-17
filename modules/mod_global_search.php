@@ -1,6 +1,6 @@
 <?php
 /**
- * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.11 2009/10/01 14:17:04 wjames5 Exp $
+ * $Header: /cvsroot/bitweaver/_bit_search/modules/mod_global_search.php,v 1.12 2010/04/17 15:36:08 wjames5 Exp $
  *
  * Copyright (c) 2004 bitweaver.org
  * Copyright (c) 2003 tikwiki.org
@@ -8,7 +8,7 @@
  * All Rights Reserved. See below for details and a complete list of authors.
  * Licensed under the GNU LESSER GENERAL PUBLIC LICENSE. See http://www.gnu.org/copyleft/lesser.html for details
  *
- * $Id: mod_global_search.php,v 1.11 2009/10/01 14:17:04 wjames5 Exp $
+ * $Id: mod_global_search.php,v 1.12 2010/04/17 15:36:08 wjames5 Exp $
  * @author  Luis Argerich (lrargerich@yahoo.com)
  * @package search
  * @subpackage modules
@@ -26,7 +26,7 @@ if( empty( $contentTypes ) ) {
 		if (SearchLib::has_permission($cType["content_type_guid"])
 			and ( ! $gBitSystem->getConfig('search_restrict_types') ||
 				  $gBitSystem->getConfig('search_pkg_'.$cType["content_type_guid"]) ) ) {
-			$contentTypes[$cType['content_type_guid']] = $cType['content_description'];
+			$contentTypes[$cType['content_type_guid']] = $gLibertySystem->getContentTypeName( $cType['content_type_guid'] );
 		}
 	}
 }
