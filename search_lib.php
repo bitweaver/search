@@ -309,11 +309,11 @@ class SearchLib extends BitBase {
 		}
 	}
 
-	function has_permission($pContentType = NULL) {
+	public static function has_permission($pContentType = NULL) {
 		global $gBitUser, $gLibertySystem;
 
 		if ( ! empty( $pContentType ) ) {
-			$object = $gLibertySystem->getLibertyObject(1, $pContentType, FALSE);
+			$object = LibertyBase::getLibertyObject(1, $pContentType, FALSE);
 			if ( ! empty( $object ) ) {
 				// Note that we can't do verify access here because
 				// we are using a generic object but we can at least get a
