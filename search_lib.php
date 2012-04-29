@@ -186,7 +186,7 @@ class SearchLib extends BitBase {
 						WHERE si.`content_id`=lc.`content_id`
 						AND si.`searchword` IN (" . $qPlaceHolders1 . ")
 						GROUP BY
-						si.`content_id` 
+						si.`content_id`
 						)>0 $whereSql
 					ORDER BY 9 DESC, 5 DESC
 					";
