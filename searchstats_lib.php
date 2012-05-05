@@ -18,7 +18,7 @@
  * @subpackage SearchStatsLib
  */
 class SearchStatsLib extends BitBase {
-	function SearchStatsLib() {					BitBase::BitBase();
+	function SearchStatsLib() {					parent::__construct();
 	}
 
 	function clear_search_stats() {

@@ -19,7 +19,7 @@
 
 class SearchLib extends BitBase {
 	function SearchLib() {
-		BitBase::BitBase();
+		parent::__construct();
 		$this->wordlist_cache = array(); // for caching queries to the LRU-cache-list.
 	}
 
