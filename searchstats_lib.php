@@ -18,8 +18,6 @@
  * @subpackage SearchStatsLib
  */
 class SearchStatsLib extends BitBase {
-	function SearchStatsLib() {					parent::__construct();
-	}
 
 	function clear_search_stats() {
 		$query = "DELETE FROM `".BIT_DB_PREFIX."search_stats";
