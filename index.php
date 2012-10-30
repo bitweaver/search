@@ -11,7 +11,7 @@ require_once( '../kernel/setup_inc.php' );
 
 require_once( SEARCH_PKG_PATH.'/search_lib.php');
 
-$searchlib = &new SearchLib();
+$searchlib = new SearchLib();
 
 $gBitSystem->verifyPackage( 'search' );
 
