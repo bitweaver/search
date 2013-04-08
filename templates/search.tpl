@@ -9,7 +9,7 @@
 			<div class="row">
 				{formlabel label="Limit Search" for="content_type_guid"}
 				{forminput}
-					{html_options options=$contentTypes name=content_type_guid selected=`$content_type_guid` }
+					{html_options options=$contentTypes name=content_type_guid selected=$content_type_guid }
 					{formhelp note="Limit search to the selected Liberty package"}
 				{/forminput}
 			</div>
