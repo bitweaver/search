@@ -6,7 +6,7 @@
 
 	<div class="body">
 		{form legend="Extended Search"}
-			<div class="row">
+			<div class="form-group">
 				{formlabel label="Limit Search" for="content_type_guid"}
 				{forminput}
 					{html_options options=$contentTypes name=content_type_guid selected=$content_type_guid }
@@ -14,7 +14,7 @@
 				{/forminput}
 			</div>
 
-			<div class="row">
+			<div class="form-group">
 				{formlabel label="Use Partial Word Search" for="usePart"}
 				{forminput}
 					<input type="checkbox" name="usePart" id="usePart" {if $usePart}checked{/if} />
@@ -23,7 +23,7 @@
 			</div>
 
 
-			<div class="row">
+			<div class="form-group">
 				{formlabel label="And Terms Together" for="useAnd"}
 				{forminput}
 					<input type="checkbox" name="useAnd" id="useAnd" {if $useAnd}checked{/if} />
@@ -31,14 +31,14 @@
 				{/forminput}
 			</div>
 
-			<div class="row">
+			<div class="form-group">
 				{formlabel label="Find" for="find"}
 				{forminput}
 					<input name="highlight" size="14" id="find" type="text" accesskey="s" value="{$words|escape}"/>
 				{/forminput}
 			</div>
 
-			<div class="row submit">
+			<div class="form-group submit">
 				<input type="submit" class="wikiaction" name="search" value="{tr}go{/tr}"/>
 			</div>
 		{/form}
