@@ -94,10 +94,10 @@ if ( $_REQUEST['cant'] > 0 ) {
 	}
 }
 LibertyContent::postGetList( $_REQUEST );
-$gBitSmarty->assign_by_ref( 'listInfo', $_REQUEST['listInfo'] );
+$gBitSmarty->assignByRef( 'listInfo', $_REQUEST['listInfo'] );
 
 // Find search results (build array)
-$gBitSmarty->assign_by_ref('results', $results);
+$gBitSmarty->assignByRef('results', $results);
 
 // Display the template
 $gBitSystem->display( 'bitpackage:search/search.tpl', 'Search Results for: '.strip_tags($_REQUEST["highlight"]), array( 'display_mode' => 'display' ));

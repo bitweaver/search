@@ -33,7 +33,7 @@ if ( empty( $_REQUEST["sort_mode"] ) ) {
 } else {
 	$sort_mode = $_REQUEST["sort_mode"];
 }
-$gBitSmarty->assign_by_ref('sort_mode', $sort_mode);
+$gBitSmarty->assignByRef('sort_mode', $sort_mode);
 
 if (!isset($_REQUEST["offset"])) {
 	$offset = 0;
@@ -44,7 +44,7 @@ if (isset($_REQUEST['page'])) {
 	$page = &$_REQUEST['page'];
 	$offset = ($page - 1) * $max_records;
 }
-$gBitSmarty->assign_by_ref('offset', $offset);
+$gBitSmarty->assignByRef('offset', $offset);
 
 if (isset($_REQUEST["find"])) {
 	$find = $_REQUEST["find"];
@@ -60,7 +60,7 @@ if ($_REQUEST['where'] == 'all') {
 }
 
 $cant_pages = ceil($items["cant"] / $max_records);
-$gBitSmarty->assign_by_ref('cant_pages', $cant_pages);
+$gBitSmarty->assignByRef('cant_pages', $cant_pages);
 $gBitSmarty->assign('actual_page', 1 + ($offset / $max_records));
 
 if ($items["cant"] > ($offset + $max_records)) {
@@ -75,7 +75,7 @@ if ($offset > 0) {
 	$gBitSmarty->assign('prev_offset', -1);
 }
 
-$gBitSmarty->assign_by_ref('items', $items["data"]);
+$gBitSmarty->assignByRef('items', $items["data"]);
 
 $section = 'directory';
 // Display the template

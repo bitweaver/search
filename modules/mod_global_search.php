@@ -30,5 +30,5 @@ if( empty( $contentTypes ) ) {
 		}
 	}
 }
-$gBitSmarty->assign( 'contentTypes', $contentTypes );
+$_template->tpl_vars['contentTypes'] = new Smarty_variable( $contentTypes );
 ?>
