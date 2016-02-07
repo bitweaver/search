@@ -1,7 +1,5 @@
 <?php
 /**
- * @package search
- *
  * Command Line Site Reindex
  * Created with stub from jht001 and help from KainX (Thanks to you both)
  * 
@@ -33,6 +31,7 @@
  * I have run the "unindexedonly" option several times in a row and was told it attempted to 
  * reindex 20 pieces of content each time. 
  *
+ * @package search
  */
 
 /**
