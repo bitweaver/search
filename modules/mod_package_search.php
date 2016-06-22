@@ -19,14 +19,14 @@
  */
 require_once(SEARCH_PKG_PATH."search_lib.php");
 
-	$tplName = strtolower( ACTIVE_PACKAGE ).'_mini_search.tpl';
-	$searchTemplatePath = BIT_ROOT_URL.constant( strtoupper( ACTIVE_PACKAGE ).'_PKG_PATH' ).'templates/'.$tplName;
+	$tplName = $gBitSystem->getActivePackage().'_mini_search.tpl';
+	$searchTemplatePath = BIT_ROOT_URL.constant( strtoupper( $gBitSystem->getActivePackage() ).'_PKG_PATH' ).'templates/'.$tplName;
 	
 	global $gLibertySystem;
 
 	if( file_exists( $searchTemplatePath ) ) {
-		$searchTemplateRsrc = 'bitpackage:'.strtolower( ACTIVE_PACKAGE ).'/'.$tplName;
-		$searchTitle = ucfirst( ACTIVE_PACKAGE );
+		$searchTemplateRsrc = 'bitpackage:'.$gBitSystem->getActivePackage().'/'.$tplName;
+		$searchTitle = ucfirst( $gBitSystem->getActivePackage() );
 	} else {
 		$searchTemplateRsrc = 'bitpackage:search/global_mini_search.tpl';
 		$searchTitle = '';
